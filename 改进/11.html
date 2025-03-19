@@ -1,0 +1,746 @@
+﻿    <!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><style>.nodata  main {width:1000px;margin: auto;}</style></head><body class="nodata " style=""><div class="main_father clearfix d-flex justify-content-center " style="height:100%;"> <div class="container clearfix " id="mainBox"><main><div class="blog-content-box">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" type="text/css" href="https://2.lz787.com/assets/1.css">
+
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-yellow/skin-yellow-28d34ab5fa.min.css"><div class="blog-content-box">
+    <div class="article-header-box">
+        <div class="article-header">
+            <div class="article-title-box">
+                <h1 class="title-article" id="articleContentId">YOLOv5改进系列（11）——添加损失函数之EIoU、AlphaIoU、SIoU、WIoU</h1>
+            </div>
+            <div class="article-info-box">
+                <div class="article-bar-top">
+                    <img class="article-type-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/original.png" alt="">
+                    <div class="bar-content">
+                      <a class="follow-nickName vip-name" href="https://jrs0511.blog.csdn.net" target="_blank" rel="noopener" title="路人贾'ω'">路人贾'ω'</a>
+                    <img class="article-time-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUpTime2.png" alt="">
+                    <span class="time">已于&nbsp;2023-07-20 12:34:04&nbsp;修改</span>
+                   <div class="read-count-box">
+                      <img class="article-read-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/articleReadEyes2.png" alt="">
+                      <span class="read-count">阅读量8.2k</span>
+                      <a id="blog_detail_zk_collection" class="un-collection" data-report-click='{"mod":"popu_823","spm":"1001.2101.3001.4232","ab":"new"}'>
+                          <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect2.png" alt="">
+                          <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive2.png" alt="">
+                          <span class="name">收藏</span>
+                          <span class="get-collection">
+                              26
+                          </span>
+                      </a>
+                      <div class="read-count-box is-like">
+                        <img class="article-read-img article-heard-img" style="display:none" id="is-like-imgactive-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Active.png" alt="">
+                        <img class="article-read-img article-heard-img" style="display:block" id="is-like-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Black.png" alt="">
+                        <span class="read-count" id="blog-digg-num">点赞数
+                            7
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="blog-tags-box">
+                    <div class="tags-box artic-tag-box">
+                            <span class="label">分类专栏：</span>
+                                <a class="tag-link" href="https://blog.csdn.net/weixin_43334693/category_12233704.html" target="_blank" rel="noopener">YOLOv5入门＋实践＋改进</a>
+                            <span class="label">文章标签：</span>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"YOLO","ab":"new","extra":"{\"searchword\":\"YOLO\"}"}' data-report-view='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"YOLO","ab":"new","extra":"{\"searchword\":\"YOLO\"}"}' class="tag-link" href="https://so.csdn.net/so/search/s.do?q=YOLO&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank" rel="noopener">YOLO</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"目标检测","ab":"new","extra":"{\"searchword\":\"目标检测\"}"}' data-report-view='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"目标检测","ab":"new","extra":"{\"searchword\":\"目标检测\"}"}' class="tag-link" href="https://so.csdn.net/so/search/s.do?q=目标检测&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank" rel="noopener">目标检测</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"计算机视觉","ab":"new","extra":"{\"searchword\":\"计算机视觉\"}"}' data-report-view='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"计算机视觉","ab":"new","extra":"{\"searchword\":\"计算机视觉\"}"}' class="tag-link" href="https://so.csdn.net/so/search/s.do?q=计算机视觉&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank" rel="noopener">计算机视觉</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"人工智能","ab":"new","extra":"{\"searchword\":\"人工智能\"}"}' data-report-view='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"人工智能","ab":"new","extra":"{\"searchword\":\"人工智能\"}"}' class="tag-link" href="https://so.csdn.net/so/search/s.do?q=人工智能&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank" rel="noopener">人工智能</a>
+                    </div>
+                </div>
+                <div class="up-time"><span>于&nbsp;2023-06-23 20:04:56&nbsp;首次发布</span></div>
+                <div class="slide-content-box">
+                    <div class="article-copyright">
+                        <div class="creativecommons">
+                            版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 BY-SA </a>版权协议，转载请附上原文出处链接和本声明。
+                        </div>
+                        <div class="article-source-link">
+                            本文链接：<a href="https://blog.csdn.net/weixin_43334693/article/details/131350224" target="_blank">https://blog.csdn.net/weixin_43334693/article/details/131350224</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="operating">
+                    <a class="href-article-edit slide-toggle">版权</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="blogHuaweiyunAdvert"></div>
+        <div id="blogColumnPayAdvert">
+            <div class="column-group">
+                <div class="column-group-item column-group0 column-group-item-one">
+                    <div class="item-l">
+                        <a class="item-target" href="https://blog.csdn.net/weixin_43334693/category_12233704.html" target="_blank" title="YOLOv5入门＋实践＋改进"
+                        data-report-view='{"spm":"1001.2101.3001.6332"}'
+                        data-report-click='{"spm":"1001.2101.3001.6332"}'>
+                            <img class="item-target" src="https://img-blog.csdnimg.cn/0c61c23a5a1448488da55b6e4e1d5d58.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                            <span class="title item-target">
+                                <span>
+                                <span class="tit">YOLOv5入门＋实践＋改进</span>
+                                    <span class="dec">专栏收录该内容</span>
+                                </span>
+                                <span class="rank"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/columnHotIcon2.png" alt="">该专栏为热销专栏榜&nbsp;第78名</span>
+                            </span>
+                        </a>
+                    </div>
+                    <div class="item-m">
+                        <span>47 篇文章</span>
+                        <span>1055 订阅</span>
+                        <span class="old-add-new-box">
+                            <span class="price">yen99.90</span>
+                            <span class="oldprice">yen299.90</span>
+                        </span>
+                    </div>
+                    <div class="item-r">
+                                    <a class="item-target article-column-subscribe">已订阅
+                                    </a>
+                                    <a class="item-target column-studyvip-discount column-studyvip-pass"
+                                    data-report-view='{"spm":"1001.2015.3001.8590"}'
+                                    data-report-click='{"spm":"1001.2015.3001.8590"}'>8折续费
+                                    </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="learning_the_member_box">
+            <a href="https://www.csdn.net/vip?utm_source=bkzl_cjhy_ckqy" target="_blank">
+                <div class="left"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/iconVIpCrown.png" alt=""><span>您已是超级会员，正在免费阅读会员专享内容</span></div>
+                <div class="right"><span>查看更多超级会员权益</span><img src="https://csdnimg.cn/release/blogv2/dist/components/img/vipIconArrowLeftWhite.png" alt=""></div>
+            </a>
+        </div>
+      <div class="ai-abstract-box">
+         <div class="ai-abstract">
+          <div class="abstract-content">
+            <img class="lock-img" src="https://img-home.csdnimg.cn/images/20240711042549.png" alt="">
+            本文深入探讨YOLOv5中EIoU、AlphaIoU、SIoU和WIoU四种改进的IoU损失函数，包括它们的简介、作用以及如何在YOLOv5的`metric.py`和`loss.py`文件中进行配置。EIoU解决了CIoU的纵横比模糊问题，AlphaIoU通过调节α参数提高回归精度，SIoU引入角度惩罚度量提高训练速度和准确性，而WIoU则考虑了预测框和真实框之间的区域，改善评估偏差。
+          </div>
+          <span>摘要由CSDN通过智能技术生成</span>
+        </div>
+      </div>
+    <article class="baidu_pl">
+        <div id="article_content" class="article_content clearfix">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-704d5b9767.css">
+             
+                <div id="content_views" class="htmledit_views">
+                    <p style="text-align:center;"><img alt="" src="https://i-blog.csdnimg.cn/blog_migrate/7c409eb6c25f818abbf65d2a7e0dda4f.gif" /></p> 
+<p style="text-align:center;"><img alt="" src="https://i-blog.csdnimg.cn/blog_migrate/c296605ef2b5f6278e36753757763eef.png" /></p> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="62" src="https://i-blog.csdnimg.cn/blog_migrate/ac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="62" /><strong>【YOLOv5改进系列】前期回顾&#xff1a;</strong></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130564848?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;0&#xff09;——重要性能指标与训练结果评价及分析">YOLOv5改进系列&#xff08;0&#xff09;——重要性能指标与训练结果评价及分析</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130551913?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;1&#xff09;——添加SE注意力机制">YOLOv5改进系列&#xff08;1&#xff09;——添加SE注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130587102?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;2&#xff09;——添加CBAM注意力机制">YOLOv5改进系列&#xff08;2&#xff09;——添加CBAM注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130619604?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;3&#xff09;——添加CA注意力机制">YOLOv5改进系列&#xff08;3&#xff09;——添加CA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130641318?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;4&#xff09;——添加ECA注意力机制">YOLOv5改进系列&#xff08;4&#xff09;——添加ECA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130832933?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;5&#xff09;——替换主干网络之 MobileNetV3">YOLOv5改进系列&#xff08;5&#xff09;——替换主干网络之 MobileNetV3</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131008642?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;6&#xff09;——替换主干网络之 ShuffleNetV2">YOLOv5改进系列&#xff08;6&#xff09;——替换主干网络之 ShuffleNetV2</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131031541?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;7&#xff09;——添加SimAM注意力机制">YOLOv5改进系列&#xff08;7&#xff09;——添加SimAM注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131053284?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;8&#xff09;——添加SOCA注意力机制">YOLOv5改进系列&#xff08;8&#xff09;——添加SOCA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131207097?csdn_share_tail&#61;{"type":"blog","rType":"article","rId":"131207097","source":"weixin_43334693"}" title="YOLOv5改进系列&#xff08;9&#xff09;——替换主干网络之EfficientNetv2">YOLOv5改进系列&#xff08;9&#xff09;——替换主干网络之EfficientNetv2</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131235113?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;10&#xff09;——替换主干网络之GhostNet">YOLOv5改进系列&#xff08;10&#xff09;——替换主干网络之GhostNet</a></p> 
+<p style="text-align:center;"><img alt="" src="https://i-blog.csdnimg.cn/blog_migrate/08366df22961291ce29c003c99086da4.gif" /></p> 
+<hr /> 
+<p id="main-toc"><strong>目录</strong></p> 
+<p id="一、不同IoU的介绍-toc" style="margin-left:0px;"><a href="#一、不同IoU的介绍" rel="nofollow">一、不同IoU的介绍</a></p> 
+<p id="二、IoU、GIoU、DIoU、CIoU-toc" style="margin-left:0px;"><a href="#二、IoU、GIoU、DIoU、CIoU" rel="nofollow">二、IoU、GIoU、DIoU、CIoU</a></p> 
+<p id="三、EIoU-toc" style="margin-left:0px;"><a href="#三、EIoU" rel="nofollow">三、EIoU</a></p> 
+<p id="3.1 简介-toc" style="margin-left:40px;"><a href="#3.1 简介" rel="nofollow">3.1 简介</a></p> 
+<p id="3.2 添加步骤-toc" style="margin-left:40px;"><a href="#3.2 添加步骤" rel="nofollow">3.2 添加步骤</a></p> 
+<p id="第①步 配置metric.py文件-toc" style="margin-left:80px;"><a href="#第①步 配置metric.py文件" rel="nofollow">第①步 配置metric.py文件</a></p> 
+<p id="第②步 配置loss.py文件-toc" style="margin-left:80px;"><a href="#第②步 配置loss.py文件" rel="nofollow">第②步 配置loss.py文件</a></p> 
+<p id="四、Alpha IoU-toc" style="margin-left:0px;"><a href="#四、Alpha IoU" rel="nofollow">四、Alpha IoU</a></p> 
+<p id="4.1 简介-toc" style="margin-left:40px;"><a href="#4.1 简介" rel="nofollow">4.1 简介</a></p> 
+<p id="4.2 添加步骤-toc" style="margin-left:40px;"><a href="#4.2 添加步骤" rel="nofollow">4.2 添加步骤</a></p> 
+<p id="第①步 配置metric.py文件-toc" style="margin-left:80px;"><a href="#第①步 配置metric.py文件" rel="nofollow">第①步 配置metric.py文件</a></p> 
+<p id="第②步 配置loss.py文件-toc" style="margin-left:80px;"><a href="#第②步 配置loss.py文件" rel="nofollow">第②步 配置loss.py文件</a></p> 
+<p id="五、SIoU-toc" style="margin-left:0px;"><a href="#五、SIoU" rel="nofollow">五、SIoU</a></p> 
+<p id="5.1 简介-toc" style="margin-left:40px;"><a href="#5.1 简介" rel="nofollow">5.1 简介</a></p> 
+<p id="5.2 添加步骤-toc" style="margin-left:40px;"><a href="#5.2 添加步骤" rel="nofollow">5.2 添加步骤</a></p> 
+<p id="第①步 配置metric.py文件-toc" style="margin-left:80px;"><a href="#第①步 配置metric.py文件" rel="nofollow">第①步 配置metric.py文件</a></p> 
+<p id="第②步 配置loss.py文件-toc" style="margin-left:80px;"><a href="#第②步 配置loss.py文件" rel="nofollow">第②步 配置loss.py文件</a></p> 
+<p id="六、WIoU-toc" style="margin-left:0px;"><a href="#六、WIoU" rel="nofollow">六、WIoU</a></p> 
+<p id="6.1 简介-toc" style="margin-left:40px;"><a href="#6.1 简介" rel="nofollow">6.1 简介</a></p> 
+<p id="6.2 添加步骤-toc" style="margin-left:40px;"><a href="#6.2 添加步骤" rel="nofollow">6.2 添加步骤</a></p> 
+<p id="第①步 配置metric.py文件-toc" style="margin-left:80px;"><a href="#第①步 配置metric.py文件" rel="nofollow">第①步 配置metric.py文件</a></p> 
+<p id="第②步 配置loss.py文件-toc" style="margin-left:80px;"><a href="#第②步 配置loss.py文件" rel="nofollow">第②步 配置loss.py文件</a></p> 
+<p id="本人YOLOv5系列导航-toc" style="margin-left:0px;"><a href="#本人YOLOv5系列导航" rel="nofollow">&#x1f31f;本人YOLOv5系列导航</a></p> 
+<p><img alt="" src="https://i-blog.csdnimg.cn/blog_migrate/3c67b1a83740fb1fa5860794ee867b7c.gif" /></p> 
+<h2 id="一、不同IoU的介绍">一、不同IoU的介绍</h2> 
+<p>要学会修改代码前一定要先了解这几个IoU的区别和计算方法&#xff1a;</p> 
+<ul><li><span style="color:#4da8ee;"><strong>IoU Loss&#xff1a;</strong></span>主要考虑<span style="color:#4da8ee;">检测框和目标框重叠面积</span>。</li><li><span style="color:#a2e043;"><strong>GIoU Loss&#xff1a;</strong></span>在IoU的基础上&#xff0c;解决<span style="color:#a2e043;">边界框不相交时loss等于0</span>的问题。</li><li><span style="color:#ffd900;"><strong>DIoU Loss&#xff1a;</strong></span>在IoU和GIoU的基础上&#xff0c;考虑<span style="color:#ffd900;">边界框中心点距离</span>的信息。</li><li><span style="color:#ff9900;"><strong>CIoU Loss&#xff1a;</strong></span>在DIoU的基础上&#xff0c;考虑<span style="color:#ff9900;">边界框宽高比的尺度</span>信息。</li><li><span style="color:#1c7892;"><strong>EIoU Loss&#xff1a;</strong></span>在CIoU的基础上&#xff0c;解决了<span style="color:#1c7892;">纵横比的模糊定义</span>&#xff0c;并<span style="color:#1c7892;">添加Focal Loss解决BBox回归中的样本不平衡</span>问题。</li><li><span style="color:#956fe7;"><strong>αIoU Loss&#xff1a;</strong></span>通过<span style="color:#956fe7;">调节α</span>&#xff0c;使探测器更灵活地<span style="color:#956fe7;">实现不同水平的bbox回归精度。</span></li><li><strong><span style="color:#b95514;">SIoU Loss&#xff1a;</span></strong>在EIoU的基础上&#xff0c;加入了类别信息的权重因子&#xff0c;以<span style="color:#b95514;">提高检测模型的分类准确率</span>。</li><li><strong><span style="color:#1c7331;">WIoU Loss&#xff1a;</span></strong>解决<span style="color:#1c7331;">质量较好和质量较差的样本间的BBR平衡</span>问题</li></ul> 
+<p>更多详细的内容在上一篇就已经详细介绍过了&#xff0c;快上直通车&#xff1a;</p> 
+<blockquote> 
+ <p><a href="https://blog.csdn.net/weixin_43334693/article/details/131304963?spm&#61;1001.2014.3001.5501" title="损失函数&#xff1a;IoU、GIoU、DIoU、CIoU、EIoU、alpha IoU、SIoU、WIoU超详细精讲及Pytorch实现">损失函数&#xff1a;IoU、GIoU、DIoU、CIoU、EIoU、alpha IoU、SIoU、WIoU超详细精讲及Pytorch实现</a></p> 
+</blockquote> 
+<hr /> 
+<h2 id="二、IoU、GIoU、DIoU、CIoU">二、IoU、GIoU、DIoU、CIoU</h2> 
+<p> 这几个IoU在YOLO v5的源码中都有提供&#xff0c;在<span style="color:#fe2c24;"><strong>utils/metrics.py</strong></span><span style="color:#0d0016;">文件夹下的</span>&#xff0c;<span style="color:#fe2c24;"><strong>bbox_iou</strong></span><span style="color:#0d0016;">函数里。</span></p> 
+<p class="img-center"><img alt="" height="597" src="https://i-blog.csdnimg.cn/blog_migrate/4a690e00ade56add8a4cd4baf1fdfecc.png" width="589" /></p> 
+<p>这个函数是用来计算矩阵框间的IoU的</p> 
+<pre><code class="language-python">def bbox_iou(box1, box2, x1y1x2y2&#61;True, GIoU&#61;False, DIoU&#61;False, CIoU&#61;False, eps&#61;1e-7):</code></pre> 
+<p> 通过这行代码我们可以看出&#xff0c;GIoU&#xff0c;DIoU&#xff0c;CIoU的bool值如果全部为False时&#xff0c;会返回最普通的IoU&#xff0c;如果其中一个为True的时候&#xff0c;即返回设定为True的那个IoU</p> 
+<p>通常用来在<span style="color:#fe2c24;"><strong>utils/loss.py</strong></span>文件夹下的<span style="color:#fe2c24;"><strong>__call__函数</strong></span>中计算回归损失&#xff08;bbox损失&#xff09;</p> 
+<p class="img-center"><img alt="" height="309" src="https://i-blog.csdnimg.cn/blog_migrate/8b46f3252c49527fe27c2ff096230967.png" width="644" /></p> 
+<p>可以看出YOLOv5中bbox_iou其默认用的是<span style="color:#fe2c24;"><strong>CIoU</strong></span> </p> 
+<hr /> 
+<h2 id="三、EIoU">三、EIoU</h2> 
+<h3 id="3.1 简介">3.1 简介</h3> 
+<p><span style="color:#fe2c24;"><strong>EIoU </strong></span>是在 CIoU 的惩罚项基础上将预测框和真实框的纵横比的影响因子拆开&#xff0c;<strong>分别计算预测框和真实框的长和宽</strong>&#xff0c;来解决 CIoU 存在的问题。</p> 
+<p><span style="color:#fe2c24;"><strong>EIoU</strong></span>包括三个部分&#xff1a;<strong>IoU损失、距离损失、高宽损失&#xff08;重叠面积、中心点举例、高宽比&#xff09;</strong>。高宽损失直接最小化了预测目标边界框和真实边界框的高度和宽度的差异&#xff0c;使其有更快的收敛速度和更好的定位结果。</p> 
+<p class="img-center"><img alt="" height="406" src="https://i-blog.csdnimg.cn/blog_migrate/5b04adc729888f3cf51eac5bd6e7b1ca.png#pic_center" width="427" /></p> 
+<hr /> 
+<h3 id="3.2 添加步骤">3.2 添加步骤</h3> 
+<h4 id="第①步 配置metric.py文件"><span style="background-color:#38d8f0;">第①步 </span><strong><span style="background-color:#38d8f0;">配置metric.py文件</span></strong></h4> 
+<p>首先我们找到刚才的<span style="color:#fe2c24;"><strong>utils/metrics.py</strong></span><span style="color:#0d0016;">文件夹下的</span><span style="color:#fe2c24;"><strong>bbox_iou</strong></span><span style="color:#0d0016;">函数&#xff0c;然后将函数整个替换成下面的代码&#xff1a;</span></p> 
+<pre><code class="language-python">def bbox_iou(box1, box2, x1y1x2y2&#61;True, GIoU&#61;False, DIoU&#61;False, CIoU&#61;False,  EIoU&#61;False, eps&#61;1e-7):
+    # Returns the IoU of box1 to box2. box1 is 4, box2 is nx4
+    box2 &#61; box2.T
+
+    # Get the coordinates of bounding boxes
+    if x1y1x2y2:  # x1, y1, x2, y2 &#61; box1
+        b1_x1, b1_y1, b1_x2, b1_y2 &#61; box1[0], box1[1], box1[2], box1[3]
+        b2_x1, b2_y1, b2_x2, b2_y2 &#61; box2[0], box2[1], box2[2], box2[3]
+    else:  # transform from xywh to xyxy
+        b1_x1, b1_x2 &#61; box1[0] - box1[2] / 2, box1[0] &#43; box1[2] / 2
+        b1_y1, b1_y2 &#61; box1[1] - box1[3] / 2, box1[1] &#43; box1[3] / 2
+        b2_x1, b2_x2 &#61; box2[0] - box2[2] / 2, box2[0] &#43; box2[2] / 2
+        b2_y1, b2_y2 &#61; box2[1] - box2[3] / 2, box2[1] &#43; box2[3] / 2
+
+    # Intersection area
+    inter &#61; (torch.min(b1_x2, b2_x2) - torch.max(b1_x1, b2_x1)).clamp(0) * \
+            (torch.min(b1_y2, b2_y2) - torch.max(b1_y1, b2_y1)).clamp(0)
+
+    # Union Area
+    w1, h1 &#61; b1_x2 - b1_x1, b1_y2 - b1_y1 &#43; eps
+    w2, h2 &#61; b2_x2 - b2_x1, b2_y2 - b2_y1 &#43; eps
+    union &#61; w1 * h1 &#43; w2 * h2 - inter &#43; eps
+
+    iou &#61; inter / union
+    if GIoU or DIoU or CIoU or EIoU:
+        cw &#61; torch.max(b1_x2, b2_x2) - torch.min(b1_x1, b2_x1)  # convex (smallest enclosing box) width
+        ch &#61; torch.max(b1_y2, b2_y2) - torch.min(b1_y1, b2_y1)  # convex height
+        if CIoU or DIoU or EIoU:  # Distance or Complete IoU https://arxiv.org/abs/1911.08287v1
+            c2 &#61; cw ** 2 &#43; ch ** 2 &#43; eps  # convex diagonal squared
+            rho2 &#61; ((b2_x1 &#43; b2_x2 - b1_x1 - b1_x2) ** 2 &#43;
+                    (b2_y1 &#43; b2_y2 - b1_y1 - b1_y2) ** 2) / 4  # center distance squared
+            if DIoU:
+                return iou - rho2 / c2  # DIoU
+            elif CIoU:  # https://github.com/Zzh-tju/DIoU-SSD-pytorch/blob/master/utils/box/box_utils.py#L47
+                v &#61; (4 / math.pi ** 2) * torch.pow(torch.atan(w2 / h2) - torch.atan(w1 / h1), 2)
+                with torch.no_grad():
+                    alpha &#61; v / (v - iou &#43; (1 &#43; eps))
+                return iou - (rho2 / c2 &#43; v * alpha)  # CIoU
+            elif EIoU:
+                rho_w2 &#61; ((b2_x2 - b2_x1) - (b1_x2 - b1_x1)) ** 2
+                rho_h2 &#61; ((b2_y2 - b2_y1) - (b1_y2 - b1_y1)) ** 2
+                cw2 &#61; cw ** 2 &#43; eps
+                ch2 &#61; ch ** 2 &#43; eps
+                return iou - (rho2 / c2 &#43; rho_w2 / cw2 &#43; rho_h2 / ch2)
+        else:  # GIoU https://arxiv.org/pdf/1902.09630.pdf
+            c_area &#61; cw * ch &#43; eps  # convex area
+            return iou - (c_area - union) / c_area  # GIoU
+    else:
+        return iou  # IoU
+
+</code></pre> 
+<hr /> 
+<h4 id="第②步 配置loss.py文件"><span style="background-color:#a2e043;">第②步 </span><strong><span style="background-color:#a2e043;">配置</span></strong><span style="background-color:#a2e043;">loss.py</span><strong><span style="background-color:#a2e043;">文件</span></strong></h4> 
+<p>然后再找到<span style="color:#fe2c24;"><strong>utils/loss.py</strong></span>文件夹下的<span style="color:#fe2c24;"><strong>__call__函数</strong></span>&#xff0c;把Regression loss中计算IoU的代码&#xff0c;换成下面这句&#xff1a; </p> 
+<pre><code class="language-python">iou &#61; bbox_iou(pbox.T, tbox[i], x1y1x2y2&#61;False, CIoU&#61;False, EIoU&#61;True)  </code></pre> 
+<p>如下图所示&#xff1a; </p> 
+<p class="img-center"><img alt="" height="325" src="https://i-blog.csdnimg.cn/blog_migrate/db4b528cab9523470f915fd0322d6d5a.png" width="630" /></p> 
+<p class="img-center"><img alt="" height="312" src="https://i-blog.csdnimg.cn/blog_migrate/1f67abc2c21b0decbabef252fa940244.png" width="638" /></p> 
+<hr /> 
+<h2 id="四、Alpha IoU">四、Alpha IoU</h2> 
+<h3 id="4.1 简介">4.1 简介</h3> 
+<p>作者将现有的基于IoU Loss推广到一个新的Power IoU系列 Loss&#xff0c;<strong>该系列具有一个Power IoU项和一个附加的Power正则项&#xff0c;具有单个Power参数α</strong>&#xff0c;称这种新的损失系列为<span style="color:#fe2c24;"><strong>α-IoU Loss</strong></span>。</p> 
+<p>通过调节α&#xff0c;使检测器在实现不同水平的bbox回归精度方面具有更大的灵活性。并且α-IoU 对小数据集和噪声的鲁棒性更强。</p> 
+<p>通过实验发现&#xff0c;在大多数情况下&#xff0c;取<span style="color:#fe2c24;"><strong>α&#61;3 </strong></span>的效果最好。</p> 
+<hr /> 
+<h3 id="4.2 添加步骤">4.2 添加步骤</h3> 
+<h4><span style="background-color:#38d8f0;">第①步 </span><strong><span style="background-color:#38d8f0;">配置metric.py文件</span></strong></h4> 
+<p>首先我们找到刚才的<span style="color:#fe2c24;"><strong>utils/metrics.py</strong></span><span style="color:#0d0016;">文件夹下的</span><span style="color:#fe2c24;"><strong>bbox_iou</strong></span><span style="color:#0d0016;">函数&#xff0c;然后将函数整个替换成下面的代码&#xff0c;因为上文也提到</span><span style="color:#fe2c24;"><strong>α&#61;3</strong></span><span style="color:#0d0016;">时效果最好&#xff0c;所以这里我们将alpha的值设置为3&#xff1a;</span></p> 
+<pre><code class="language-python">def bbox_alpha_iou(box1, box2, x1y1x2y2&#61;False, GIoU&#61;False, DIoU&#61;False, CIoU&#61;False, alpha&#61;3, eps&#61;1e-7):
+    # Returns tsqrt_he IoU of box1 to box2. box1 is 4, box2 is nx4
+    box2 &#61; box2.T
+
+    # Get the coordinates of bounding boxes
+    if x1y1x2y2:  # x1, y1, x2, y2 &#61; box1
+        b1_x1, b1_y1, b1_x2, b1_y2 &#61; box1[0], box1[1], box1[2], box1[3]
+        b2_x1, b2_y1, b2_x2, b2_y2 &#61; box2[0], box2[1], box2[2], box2[3]
+    else:  # transform from xywh to xyxy
+        b1_x1, b1_x2 &#61; box1[0] - box1[2] / 2, box1[0] &#43; box1[2] / 2
+        b1_y1, b1_y2 &#61; box1[1] - box1[3] / 2, box1[1] &#43; box1[3] / 2
+        b2_x1, b2_x2 &#61; box2[0] - box2[2] / 2, box2[0] &#43; box2[2] / 2
+        b2_y1, b2_y2 &#61; box2[1] - box2[3] / 2, box2[1] &#43; box2[3] / 2
+
+    # Intersection area
+    inter &#61; (torch.min(b1_x2, b2_x2) - torch.max(b1_x1, b2_x1)).clamp(0) * \
+            (torch.min(b1_y2, b2_y2) - torch.max(b1_y1, b2_y1)).clamp(0)
+
+    # Union Area
+    w1, h1 &#61; b1_x2 - b1_x1, b1_y2 - b1_y1 &#43; eps
+    w2, h2 &#61; b2_x2 - b2_x1, b2_y2 - b2_y1 &#43; eps
+    union &#61; w1 * h1 &#43; w2 * h2 - inter &#43; eps
+
+    # change iou into pow(iou&#43;eps)
+    # iou &#61; inter / union
+    iou &#61; torch.pow(inter/union &#43; eps, alpha)
+    # beta &#61; 2 * alpha
+    if GIoU or DIoU or CIoU:
+        cw &#61; torch.max(b1_x2, b2_x2) - torch.min(b1_x1, b2_x1)  # convex (smallest enclosing box) width
+        ch &#61; torch.max(b1_y2, b2_y2) - torch.min(b1_y1, b2_y1)  # convex height
+        if CIoU or DIoU:  # Distance or Complete IoU https://arxiv.org/abs/1911.08287v1
+            c2 &#61; (cw ** 2 &#43; ch ** 2) ** alpha &#43; eps  # convex diagonal
+            rho_x &#61; torch.abs(b2_x1 &#43; b2_x2 - b1_x1 - b1_x2)
+            rho_y &#61; torch.abs(b2_y1 &#43; b2_y2 - b1_y1 - b1_y2)
+            rho2 &#61; ((rho_x ** 2 &#43; rho_y ** 2) / 4) ** alpha  # center distance
+            if DIoU:
+                return iou - rho2 / c2  # DIoU
+            elif CIoU:  # https://github.com/Zzh-tju/DIoU-SSD-pytorch/blob/master/utils/box/box_utils.py#L47
+                v &#61; (4 / math.pi ** 2) * torch.pow(torch.atan(w2 / h2) - torch.atan(w1 / h1), 2)
+                with torch.no_grad():
+                    alpha_ciou &#61; v / ((1 &#43; eps) - inter / union &#43; v)
+                # return iou - (rho2 / c2 &#43; v * alpha_ciou)  # CIoU
+                return iou - (rho2 / c2 &#43; torch.pow(v * alpha_ciou &#43; eps, alpha))  # CIoU
+        else:  # GIoU https://arxiv.org/pdf/1902.09630.pdf
+            # c_area &#61; cw * ch &#43; eps  # convex area
+            # return iou - (c_area - union) / c_area  # GIoU
+            c_area &#61; torch.max(cw * ch &#43; eps, union) # convex area
+            return iou - torch.pow((c_area - union) / c_area &#43; eps, alpha)  # GIoU
+    else:
+        return iou # torch.log(iou&#43;eps) or iou
+
+</code></pre> 
+<hr /> 
+<h4><span style="background-color:#a2e043;">第②步 </span><strong><span style="background-color:#a2e043;">配置</span></strong><span style="background-color:#a2e043;">loss.py</span><strong><span style="background-color:#a2e043;">文件</span></strong></h4> 
+<p>然后再找到<span style="color:#fe2c24;"><strong>utils/loss.py</strong></span>文件夹下的<span style="color:#fe2c24;"><strong>__call__函数</strong></span>&#xff0c;将<strong><span style="background-color:#fef2f0;">bbox_iou</span></strong>换成<strong><span style="background-color:#fef2f0;">bbox_alpha_iou</span></strong></p> 
+<pre><code class="language-python">iou &#61; bbox_alpha_iou(pbox.T, tbox[i], x1y1x2y2&#61;False, alpha&#61;3, CIoU&#61;True)</code></pre> 
+<p>如下图所示&#xff1a; </p> 
+<p class="img-center"><img alt="" height="325" src="https://i-blog.csdnimg.cn/blog_migrate/db4b528cab9523470f915fd0322d6d5a.png" width="630" /></p> 
+<p class="img-center"><img alt="" height="323" src="https://i-blog.csdnimg.cn/blog_migrate/52c165ec8bd846cfbeeca2c70c07632b.png" width="638" /></p> 
+<hr /> 
+<h2 id="五、SIoU">五、SIoU</h2> 
+<h3 id="5.1 简介">5.1 简介</h3> 
+<p><span style="color:#fe2c24;"><strong>SIoU</strong></span>考虑到期望回归之间向量的角度&#xff0c;重新定义角度惩罚度量&#xff0c;<strong>它可以使预测框快速漂移到最近的轴&#xff0c;随后则只需要回归一个坐标&#xff08;X或Y&#xff09;&#xff0c;</strong>这有效地减少了自由度的总数。应用于传统的神经网络和数据集&#xff0c;表明SIoU提高了训练的速度和推理的准确性。</p> 
+<p><span style="color:#fe2c24;"><strong>SIoU</strong></span>进一步考虑了<strong>真实框和预测框之间的向量角度</strong>&#xff0c;重新定义相关损失函数&#xff0c;具体包含四个部分&#xff1a;<strong>角度损失(Angle cost)、距离损失(Distance cost)、形状损失(Shape cost)、IoU损失&#xff08;IoU cost&#xff09;</strong>。</p> 
+<hr /> 
+<h3 id="5.2 添加步骤">5.2 添加步骤</h3> 
+<h4><span style="background-color:#38d8f0;">第①步 </span><strong><span style="background-color:#38d8f0;">配置metric.py文件</span></strong></h4> 
+<p>首先我们找到刚才的<span style="color:#fe2c24;"><strong>utils/metrics.py</strong></span><span style="color:#0d0016;">文件夹下的</span><span style="color:#fe2c24;"><strong>bbox_iou</strong></span><span style="color:#0d0016;">函数&#xff0c;然后将函数整个替换成下面的代码&#xff1a;</span></p> 
+<pre><code class="language-python">def bbox_iou(box1, box2, x1y1x2y2&#61;True, GIoU&#61;False, DIoU&#61;False, CIoU&#61;False, SIoU&#61;False, eps&#61;1e-7):
+    # Returns the IoU of box1 to box2. box1 is 4, box2 is nx4
+    box2 &#61; box2.T
+ 
+    # Get the coordinates of bounding boxes
+    if x1y1x2y2:  # x1, y1, x2, y2 &#61; box1
+        b1_x1, b1_y1, b1_x2, b1_y2 &#61; box1[0], box1[1], box1[2], box1[3]
+        b2_x1, b2_y1, b2_x2, b2_y2 &#61; box2[0], box2[1], box2[2], box2[3]
+    else:  # transform from xywh to xyxy
+        b1_x1, b1_x2 &#61; box1[0] - box1[2] / 2, box1[0] &#43; box1[2] / 2
+        b1_y1, b1_y2 &#61; box1[1] - box1[3] / 2, box1[1] &#43; box1[3] / 2
+        b2_x1, b2_x2 &#61; box2[0] - box2[2] / 2, box2[0] &#43; box2[2] / 2
+        b2_y1, b2_y2 &#61; box2[1] - box2[3] / 2, box2[1] &#43; box2[3] / 2
+ 
+    # Intersection area
+    inter &#61; (torch.min(b1_x2, b2_x2) - torch.max(b1_x1, b2_x1)).clamp(0) * \
+            (torch.min(b1_y2, b2_y2) - torch.max(b1_y1, b2_y1)).clamp(0)
+ 
+    # Union Area
+    w1, h1 &#61; b1_x2 - b1_x1, b1_y2 - b1_y1 &#43; eps
+    w2, h2 &#61; b2_x2 - b2_x1, b2_y2 - b2_y1 &#43; eps
+    union &#61; w1 * h1 &#43; w2 * h2 - inter &#43; eps
+ 
+    iou &#61; inter / union
+    if GIoU or DIoU or CIoU or SIoU:
+        cw &#61; torch.max(b1_x2, b2_x2) - torch.min(b1_x1, b2_x1)  # convex (smallest enclosing box) width
+        ch &#61; torch.max(b1_y2, b2_y2) - torch.min(b1_y1, b2_y1)  # convex height
+        if SIoU:    # SIoU Loss https://arxiv.org/pdf/2205.12740.pdf
+            s_cw &#61; (b2_x1 &#43; b2_x2 - b1_x1 - b1_x2) * 0.5
+            s_ch &#61; (b2_y1 &#43; b2_y2 - b1_y1 - b1_y2) * 0.5
+            sigma &#61; torch.pow(s_cw ** 2 &#43; s_ch ** 2, 0.5)
+            sin_alpha_1 &#61; torch.abs(s_cw) / sigma
+            sin_alpha_2 &#61; torch.abs(s_ch) / sigma
+            threshold &#61; pow(2, 0.5) / 2
+            sin_alpha &#61; torch.where(sin_alpha_1 &gt; threshold, sin_alpha_2, sin_alpha_1)
+            # angle_cost &#61; 1 - 2 * torch.pow( torch.sin(torch.arcsin(sin_alpha) - np.pi/4), 2)
+            angle_cost &#61; torch.cos(torch.arcsin(sin_alpha) * 2 - np.pi / 2)
+            rho_x &#61; (s_cw / cw) ** 2
+            rho_y &#61; (s_ch / ch) ** 2
+            gamma &#61; angle_cost - 2
+            distance_cost &#61; 2 - torch.exp(gamma * rho_x) - torch.exp(gamma * rho_y)
+            omiga_w &#61; torch.abs(w1 - w2) / torch.max(w1, w2)
+            omiga_h &#61; torch.abs(h1 - h2) / torch.max(h1, h2)
+            shape_cost &#61; torch.pow(1 - torch.exp(-1 * omiga_w), 4) &#43; torch.pow(1 - torch.exp(-1 * omiga_h), 4)
+            return iou - 0.5 * (distance_cost &#43; shape_cost)
+        if CIoU or DIoU:  # Distance or Complete IoU https://arxiv.org/abs/1911.08287v1
+            c2 &#61; cw ** 2 &#43; ch ** 2 &#43; eps  # convex diagonal squared
+            rho2 &#61; ((b2_x1 &#43; b2_x2 - b1_x1 - b1_x2) ** 2 &#43;
+                    (b2_y1 &#43; b2_y2 - b1_y1 - b1_y2) ** 2) / 4  # center distance squared
+            if DIoU:
+                return iou - rho2 / c2  # DIoU
+            elif CIoU:  # https://github.com/Zzh-tju/DIoU-SSD-pytorch/blob/master/utils/box/box_utils.py#L47
+                v &#61; (4 / math.pi ** 2) * torch.pow(torch.atan(w2 / h2) - torch.atan(w1 / h1), 2)
+                with torch.no_grad():
+                    alpha &#61; v / (v - iou &#43; (1 &#43; eps))
+                return iou - (rho2 / c2 &#43; v * alpha)  # CIoU
+        else:  # GIoU https://arxiv.org/pdf/1902.09630.pdf
+            c_area &#61; cw * ch &#43; eps  # convex area
+            return iou - (c_area - union) / c_area  # GIoU
+    else:
+        return iou  # IoU
+</code></pre> 
+<hr /> 
+<h4><span style="background-color:#a2e043;">第②步 </span><strong><span style="background-color:#a2e043;">配置</span></strong><span style="background-color:#a2e043;">loss.py</span><strong><span style="background-color:#a2e043;">文件</span></strong></h4> 
+<p>然后再找到<span style="color:#fe2c24;"><strong>utils/loss.py</strong></span>文件夹下的<span style="color:#fe2c24;"><strong>__call__函数</strong></span>&#xff0c;把Regression loss中计算IoU的代码&#xff0c;换成下面这句&#xff1a; </p> 
+<pre><code class="language-python">iou &#61; bbox_iou(pbox.T, tbox[i], x1y1x2y2&#61;False, SIoU&#61;True)
+</code></pre> 
+<p>如下图所示&#xff1a; </p> 
+<p class="img-center"><img alt="" height="325" src="https://i-blog.csdnimg.cn/blog_migrate/db4b528cab9523470f915fd0322d6d5a.png" width="630" /></p> 
+<p class="img-center"><img alt="" height="337" src="https://i-blog.csdnimg.cn/blog_migrate/9e335be98ba73ae8991b06e20676521a.png" width="641" /></p> 
+<hr /> 
+<h2 id="六、WIoU">六、WIoU</h2> 
+<h3 id="6.1 简介">6.1 简介</h3> 
+<p>传统的Intersection over Union&#xff08;IoU&#xff09;只考虑了预测框和真实框的重叠部分&#xff0c;没有考虑两者之间的区域&#xff0c;导致在评估结果时可能存在偏差。基于这一思想&#xff0c;作者提出了一种基于IoU的损失&#xff0c;<strong>该损失具有动态非单调FM</strong>&#xff0c;名为<span style="color:#fe2c24;"><strong>Wise IoU&#xff08;WIoU&#xff09;</strong></span>。</p> 
+<hr /> 
+<h3 id="6.2 添加步骤">6.2 添加步骤</h3> 
+<h4><span style="background-color:#38d8f0;">第①步 </span><strong><span style="background-color:#38d8f0;">配置metric.py文件</span></strong></h4> 
+<p>首先我们找到刚才的<span style="color:#fe2c24;"><strong>utils/metrics.py</strong></span><span style="color:#0d0016;">文件夹下的</span><span style="color:#fe2c24;"><strong>bbox_iou</strong></span><span style="color:#0d0016;">函数&#xff0c;然后将函数整个替换成下面的代码&#xff1a;</span></p> 
+<pre><code class="language-python">class WIoU_Scale:
+    &#39;&#39;&#39; monotonous: {
+            None: origin v1
+            True: monotonic FM v2
+            False: non-monotonic FM v3
+        }
+        momentum: The momentum of running mean&#39;&#39;&#39;
+    
+    iou_mean &#61; 1.
+    monotonous &#61; False
+    _momentum &#61; 1 - 0.5 ** (1 / 7000)
+    _is_train &#61; True
+ 
+    def __init__(self, iou):
+        self.iou &#61; iou
+        self._update(self)
+    
+    &#64;classmethod
+    def _update(cls, self):
+        if cls._is_train: cls.iou_mean &#61; (1 - cls._momentum) * cls.iou_mean &#43; \
+                                         cls._momentum * self.iou.detach().mean().item()
+    
+    &#64;classmethod
+    def _scaled_loss(cls, self, gamma&#61;1.9, delta&#61;3):
+        if isinstance(self.monotonous, bool):
+            if self.monotonous:
+                return (self.iou.detach() / self.iou_mean).sqrt()
+            else:
+                beta &#61; self.iou.detach() / self.iou_mean
+                alpha &#61; delta * torch.pow(gamma, beta - delta)
+                return beta / alpha
+        return 1
+    
+ 
+def bbox_iou(box1, box2, xywh&#61;True, GIoU&#61;False, DIoU&#61;False, CIoU&#61;False, SIoU&#61;False, EIoU&#61;False, WIoU&#61;False, Focal&#61;False, alpha&#61;1, gamma&#61;0.5, scale&#61;False, eps&#61;1e-7):
+    # Returns Intersection over Union (IoU) of box1(1,4) to box2(n,4)
+ 
+    # Get the coordinates of bounding boxes
+    if xywh:  # transform from xywh to xyxy
+        (x1, y1, w1, h1), (x2, y2, w2, h2) &#61; box1.chunk(4, -1), box2.chunk(4, -1)
+        w1_, h1_, w2_, h2_ &#61; w1 / 2, h1 / 2, w2 / 2, h2 / 2
+        b1_x1, b1_x2, b1_y1, b1_y2 &#61; x1 - w1_, x1 &#43; w1_, y1 - h1_, y1 &#43; h1_
+        b2_x1, b2_x2, b2_y1, b2_y2 &#61; x2 - w2_, x2 &#43; w2_, y2 - h2_, y2 &#43; h2_
+    else:  # x1, y1, x2, y2 &#61; box1
+        b1_x1, b1_y1, b1_x2, b1_y2 &#61; box1.chunk(4, -1)
+        b2_x1, b2_y1, b2_x2, b2_y2 &#61; box2.chunk(4, -1)
+        w1, h1 &#61; b1_x2 - b1_x1, (b1_y2 - b1_y1).clamp(eps)
+        w2, h2 &#61; b2_x2 - b2_x1, (b2_y2 - b2_y1).clamp(eps)
+ 
+    # Intersection area
+    inter &#61; (b1_x2.minimum(b2_x2) - b1_x1.maximum(b2_x1)).clamp(0) * \
+            (b1_y2.minimum(b2_y2) - b1_y1.maximum(b2_y1)).clamp(0)
+ 
+    # Union Area
+    union &#61; w1 * h1 &#43; w2 * h2 - inter &#43; eps
+    if scale:
+        self &#61; WIoU_Scale(1 - (inter / union))
+ 
+    # IoU
+    # iou &#61; inter / union # ori iou
+    iou &#61; torch.pow(inter/(union &#43; eps), alpha) # alpha iou
+    if CIoU or DIoU or GIoU or EIoU or SIoU or WIoU:
+        cw &#61; b1_x2.maximum(b2_x2) - b1_x1.minimum(b2_x1)  # convex (smallest enclosing box) width
+        ch &#61; b1_y2.maximum(b2_y2) - b1_y1.minimum(b2_y1)  # convex height
+        if CIoU or DIoU or EIoU or SIoU or WIoU:  # Distance or Complete IoU https://arxiv.org/abs/1911.08287v1
+            c2 &#61; (cw ** 2 &#43; ch ** 2) ** alpha &#43; eps  # convex diagonal squared
+            rho2 &#61; (((b2_x1 &#43; b2_x2 - b1_x1 - b1_x2) ** 2 &#43; (b2_y1 &#43; b2_y2 - b1_y1 - b1_y2) ** 2) / 4) ** alpha  # center dist ** 2
+            if CIoU:  # https://github.com/Zzh-tju/DIoU-SSD-pytorch/blob/master/utils/box/box_utils.py#L47
+                v &#61; (4 / math.pi ** 2) * (torch.atan(w2 / h2) - torch.atan(w1 / h1)).pow(2)
+                with torch.no_grad():
+                    alpha_ciou &#61; v / (v - iou &#43; (1 &#43; eps))
+                if Focal:
+                    return iou - (rho2 / c2 &#43; torch.pow(v * alpha_ciou &#43; eps, alpha)), torch.pow(inter/(union &#43; eps), gamma)  # Focal_CIoU
+                else:
+                    return iou - (rho2 / c2 &#43; torch.pow(v * alpha_ciou &#43; eps, alpha))  # CIoU
+            elif EIoU:
+                rho_w2 &#61; ((b2_x2 - b2_x1) - (b1_x2 - b1_x1)) ** 2
+                rho_h2 &#61; ((b2_y2 - b2_y1) - (b1_y2 - b1_y1)) ** 2
+                cw2 &#61; torch.pow(cw ** 2 &#43; eps, alpha)
+                ch2 &#61; torch.pow(ch ** 2 &#43; eps, alpha)
+                if Focal:
+                    return iou - (rho2 / c2 &#43; rho_w2 / cw2 &#43; rho_h2 / ch2), torch.pow(inter/(union &#43; eps), gamma) # Focal_EIou
+                else:
+                    return iou - (rho2 / c2 &#43; rho_w2 / cw2 &#43; rho_h2 / ch2) # EIou
+            elif SIoU:
+                # SIoU Loss https://arxiv.org/pdf/2205.12740.pdf
+                s_cw &#61; (b2_x1 &#43; b2_x2 - b1_x1 - b1_x2) * 0.5 &#43; eps
+                s_ch &#61; (b2_y1 &#43; b2_y2 - b1_y1 - b1_y2) * 0.5 &#43; eps
+                sigma &#61; torch.pow(s_cw ** 2 &#43; s_ch ** 2, 0.5)
+                sin_alpha_1 &#61; torch.abs(s_cw) / sigma
+                sin_alpha_2 &#61; torch.abs(s_ch) / sigma
+                threshold &#61; pow(2, 0.5) / 2
+                sin_alpha &#61; torch.where(sin_alpha_1 &gt; threshold, sin_alpha_2, sin_alpha_1)
+                angle_cost &#61; torch.cos(torch.arcsin(sin_alpha) * 2 - math.pi / 2)
+                rho_x &#61; (s_cw / cw) ** 2
+                rho_y &#61; (s_ch / ch) ** 2
+                gamma &#61; angle_cost - 2
+                distance_cost &#61; 2 - torch.exp(gamma * rho_x) - torch.exp(gamma * rho_y)
+                omiga_w &#61; torch.abs(w1 - w2) / torch.max(w1, w2)
+                omiga_h &#61; torch.abs(h1 - h2) / torch.max(h1, h2)
+                shape_cost &#61; torch.pow(1 - torch.exp(-1 * omiga_w), 4) &#43; torch.pow(1 - torch.exp(-1 * omiga_h), 4)
+                if Focal:
+                    return iou - torch.pow(0.5 * (distance_cost &#43; shape_cost) &#43; eps, alpha), torch.pow(inter/(union &#43; eps), gamma) # Focal_SIou
+                else:
+                    return iou - torch.pow(0.5 * (distance_cost &#43; shape_cost) &#43; eps, alpha) # SIou
+            elif WIoU:
+                if Focal:
+                    raise RuntimeError(&#34;WIoU do not support Focal.&#34;)
+                elif scale:
+                    return getattr(WIoU_Scale, &#39;_scaled_loss&#39;)(self), (1 - iou) * torch.exp((rho2 / c2)), iou # WIoU https://arxiv.org/abs/2301.10051
+                else:
+                    return iou, torch.exp((rho2 / c2)) # WIoU v1
+            if Focal:
+                return iou - rho2 / c2, torch.pow(inter/(union &#43; eps), gamma)  # Focal_DIoU
+            else:
+                return iou - rho2 / c2  # DIoU
+        c_area &#61; cw * ch &#43; eps  # convex area
+        if Focal:
+            return iou - torch.pow((c_area - union) / c_area &#43; eps, alpha), torch.pow(inter/(union &#43; eps), gamma)  # Focal_GIoU https://arxiv.org/pdf/1902.09630.pdf
+        else:
+            return iou - torch.pow((c_area - union) / c_area &#43; eps, alpha)  # GIoU https://arxiv.org/pdf/1902.09630.pdf
+    if Focal:
+        return iou, torch.pow(inter/(union &#43; eps), gamma)  # Focal_IoU
+    else:
+        return iou  # IoU</code></pre> 
+<p>这里要注意几个问题&#xff1a;</p> 
+<p>&#xff08;1&#xff09;WIoU有三个版本&#xff0c;分别对应控制如下&#xff1a;</p> 
+<ul><li><strong>None: </strong>origin v1</li><li><strong>True:</strong> monotonic FM v2</li><li><strong>False: </strong>non-monotonic FM v3</li></ul> 
+<p>&#xff08;2&#xff09; WIoU是不支持Focal的。</p> 
+<hr /> 
+<h4><span style="background-color:#a2e043;">第②步 </span><strong><span style="background-color:#a2e043;">配置</span></strong><span style="background-color:#a2e043;">loss.py</span><strong><span style="background-color:#a2e043;">文件</span></strong></h4> 
+<p>这里和上面有点不同&#xff0c;我们需要找到<span style="color:#fe2c24;"><strong>utils/loss.py</strong></span>文件夹下的<span style="color:#fe2c24;"><strong>__call__函数</strong></span>&#xff0c;替换<strong>iou</strong>和<strong>lbox</strong></p> 
+<p>&#xff08;loss_iou&#xff09;函数&#xff0c;调用bbox iou损失函数时&#xff0c;将WIoU设置为True即可&#xff1a;</p> 
+<pre><code class="language-python">        # WIoU
+       iou &#61; bbox_iou(pbox, tbox[i], WIoU&#61;True, Focal&#61;False, scale&#61;True)
+</code></pre> 
+<p>如下图所示&#xff1a;</p> 
+<p class="img-center"><img alt="" height="295" src="https://i-blog.csdnimg.cn/blog_migrate/e2aa68aa3370a3ef8840a17e33c6bf40.png" width="609" /></p> 
+<p class="img-center"><img alt="" height="304" src="https://i-blog.csdnimg.cn/blog_migrate/9e5778fbfd215b056cdf38c033cd37a0.png" width="613" /></p> 
+<blockquote> 
+ <p>如果出现&#xff1a;<span style="background-color:#fef2f0;">TypeError: unsupported operand type(s) for -: &#39;float&#39; and &#39;tuple&#39;</span>&#xff0c; 这个报错&#xff08;float和元组不能相减&#xff09;</p> 
+ <p>可参考评论区&#64;<a href="https://blog.csdn.net/Mute2022" title="Mute2022">Mute2022</a> 同学的改正方法&#xff1a;</p> 
+ <p><span style="background-color:#fef2f0;">lbox &#43;&#61; (1.0 - iou).mean()</span>换成&#xff1a;<br /> if isinstance(iou, tuple):<br /> if len(iou) &#61;&#61; 2:<br /> lbox &#43;&#61; (iou[1].detach().squeeze() * (1 - iou[0].squeeze())).mean()<br /> iou &#61; iou[0].squeeze()<br /> else:<br /> lbox &#43;&#61; (iou[0] * iou[1]).mean()<br /> iou &#61; iou[2].squeeze()<br /> else:<br /> lbox &#43;&#61; (1.0 - iou.squeeze()).mean() # iou loss<br /> iou &#61; iou.squeeze()</p> 
+</blockquote> 
+<hr /> 
+<h2 id="本人YOLOv5系列导航">&#x1f31f;本人YOLOv5系列导航</h2> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="69" src="https://i-blog.csdnimg.cn/blog_migrate/ac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="69" />   &#x1f340;<strong><strong><strong><strong><a href="https://so.csdn.net/so/search?q&#61;YOLOv5源码&amp;spm&#61;1001.2101.3001.7020" title="YOLOv5源码">YOLOv5源码</a></strong></strong></strong>详解系列&#xff1a;</strong>  </p> 
+<p></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129356033?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;1&#xff09;——项目目录结构解析">YOLOv5源码逐行超详细注释与解读&#xff08;1&#xff09;——项目目录结构解析</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129349094?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;2&#xff09;——推理部分detect.py">YOLOv5源码逐行超详细注释与解读&#xff08;2&#xff09;——推理部分detect.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129460666?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;3&#xff09;——训练部分train.py">YOLOv5源码逐行超详细注释与解读&#xff08;3&#xff09;——训练部分train.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129649553?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;4&#xff09;——验证部分val&#xff08;test&#xff09;.py">YOLOv5源码逐行超详细注释与解读&#xff08;4&#xff09;——验证部分val&#xff08;test&#xff09;.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129697521?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;5&#xff09;——配置文件yolov5s.yaml">YOLOv5源码逐行超详细注释与解读&#xff08;5&#xff09;——配置文件yolov5s.yaml</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129803802?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;6&#xff09;——网络结构&#xff08;1&#xff09;yolo.py">YOLOv5源码逐行超详细注释与解读&#xff08;6&#xff09;——网络结构&#xff08;1&#xff09;yolo.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129854764?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;7&#xff09;——网络结构&#xff08;2&#xff09;common.py">YOLOv5源码逐行超详细注释与解读&#xff08;7&#xff09;——网络结构&#xff08;2&#xff09;common.py</a></p> 
+<hr /> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="69" src="https://i-blog.csdnimg.cn/blog_migrate/ac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="69" />   &#x1f340;<strong><strong><strong><strong><strong><strong><strong><strong><a href="https://so.csdn.net/so/search?q&#61;YOLOv5源码&amp;spm&#61;1001.2101.3001.7020" title="YOLOv5入门实践">YOLOv5入门实践</a></strong></strong></strong></strong></strong></strong></strong>系列&#xff1a;</strong>  </p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129981848?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;1&#xff09;——手把手带你环境配置搭建">YOLOv5入门实践&#xff08;1&#xff09;——手把手带你环境配置搭建</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129995604?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;2&#xff09;——手把手教你利用labelimg标注数据集">YOLOv5入门实践&#xff08;2&#xff09;——手把手教你利用labelimg标注数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130025866?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;3&#xff09;——手把手教你划分自己的数据集">YOLOv5入门实践&#xff08;3&#xff09;——手把手教你划分自己的数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130043351?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;4&#xff09;——手把手教你训练自己的数据集">YOLOv5入门实践&#xff08;4&#xff09;——手把手教你训练自己的数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130044342?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;5&#xff09;——从零开始&#xff0c;手把手教你训练自己的目标检测模型&#xff08;包含pyqt5界面&#xff09;">YOLOv5入门实践&#xff08;5&#xff09;——从零开始&#xff0c;手把手教你训练自己的目标检测模型&#xff08;包含pyqt5界面&#xff09;</a></p> 
+<hr /> 
+<p style="text-align:center;"><img alt="" src="https://i-blog.csdnimg.cn/blog_migrate/34154b2c38716b6eeec89e181c99cbb4.gif" /></p>
+                </div>
+        </div>
+        <div id="treeSkill"></div>
+    </article>
+  <script>
+    $(function() {
+      setTimeout(function () {
+        var mathcodeList = document.querySelectorAll('.htmledit_views img.mathcode');
+        if (mathcodeList.length > 0) {
+          for (let i = 0; i < mathcodeList.length; i  ) {
+            if (mathcodeList[i].complete) {
+              if (mathcodeList[i].naturalWidth === 0 || mathcodeList[i].naturalHeight === 0) {
+                var alt = mathcodeList[i].alt;
+                alt = '\\('   alt   '\\)';
+                var curSpan = $('<span class="img-codecogs"></span>');
+                curSpan.text(alt);
+                $(mathcodeList[i]).before(curSpan);
+                $(mathcodeList[i]).remove();
+              }
+            } else {
+              mathcodeList[i].onerror = function() {
+                var alt = mathcodeList[i].alt;
+                alt = '\\('   alt   '\\)';
+                var curSpan = $('<span class="img-codecogs"></span>');
+                curSpan.text(alt);
+                $(mathcodeList[i]).before(curSpan);
+                $(mathcodeList[i]).remove();
+              };
+            }
+          }
+          MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+        }
+      }, 500)
+    });
+  </script>
+</div>
+<div class="directory-boxshadow-dialog" style="display:none;">
+  <div class="directory-boxshadow-dialog-box">
+  </div>
+   <div class="vip-limited-time-offer-box-new" id="vip-limited-time-offer-box-new">
+      <img class="limited-img limited-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-newWhite.png">
+      <div class="vip-limited-time-top">
+        确定要放弃本次机会？
+      </div>
+      <span class="vip-limited-time-text">福利倒计时</span>
+      <div class="limited-time-box-new">
+        <span class="time-hour"></span>
+        <i>:</i>
+        <span class="time-minite"></span>
+        <i>:</i>
+        <span class="time-second"></span>
+      </div>
+      <div class="limited-time-vip-box">
+        <p>
+          <img class="coupon-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-roup.png">
+          <span class="def">立减 yen</span>
+          <span class="active limited-num"></span>
+        </p>
+        <span class="">普通VIP年卡可用</span>
+      </div>
+      <a class="limited-time-btn-new" href="https://mall.csdn.net/vip" data-report-click='{"spm":"1001.2101.3001.9621"}' data-report-query='spm=1001.2101.3001.9621'>立即使用</a>
+  </div>
+</div>    <div class="more-toolbox-new" id="toolBarBox">
+      <div class="left-toolbox">
+        <div class="toolbox-left">
+            <div class="profile-box">
+              <a class="profile-href" target="_blank" href="https://jrs0511.blog.csdn.net"><img class="profile-img" src="https://profile-avatar.csdnimg.cn/da983c398fca4f14a19ea48d137f6ca3_weixin_43334693.jpg!1">
+                <span class="profile-name">
+                  路人贾'ω'
+                </span>
+              </a>
+            </div>
+            <div class="profile-attend">
+                <a class="tool-attend tool-bt-button tool-unbt-attend" href="javascript:;" data-report-view='{"mod":"1592215036_002","spm":"1001.2101.3001.4232","extend1":"已关注"}'>已关注</a>
+              <a class="tool-item-follow active-animation" style="display:none;">关注</a>
+            </div>
+        </div>
+        <div class="toolbox-middle">
+          <ul class="toolbox-list">
+            <li class="tool-item tool-item-size tool-active is-like" id="is-like">
+              <a class="tool-item-href">
+                <img style="display:none;" id="is-like-imgactive-animation-like" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt="">
+                <img class="isactive" style="display:none" id="is-like-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2021Active.png" alt="">
+                <img class="isdefault" style="display:block" id="is-like-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2021Black.png" alt="">
+                <span id="spanCount" class="count ">
+                    7
+                </span>
+              </a>
+              <div class="tool-hover-tip"><span class="text space">点赞</span></div>
+            </li>
+            <li class="tool-item tool-item-size tool-active is-unlike" id="is-unlike">
+              <a class="tool-item-href">
+                <img class="isactive" style="margin-right:0px;display:none" id="is-unlike-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUnHeart2021Active.png" alt="">
+                <img class="isdefault" style="margin-right:0px;display:block" id="is-unlike-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUnHeart2021Black.png" alt="">
+                <span id="unlikeCount" class="count "></span>
+              </a>
+              <div class="tool-hover-tip"><span class="text space">踩</span></div>
+            </li>
+            <li class="tool-item tool-item-size tool-active is-collection ">
+              <a class="tool-item-href" href="javascript:;" data-report-click='{"mod":"popu_824","spm":"1001.2101.3001.4130","ab":"new"}'>
+                <img style="display:none" id="is-collection-img-collection" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                <img class="isdefault" id="is-collection-img" style="display:block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newCollectBlack.png" alt="">
+                <img class="isactive" id="is-collection-imgactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newCollectActive.png" alt="">
+                <span class="count get-collection " data-num="26" id="get-collection">
+                    26
+                </span>
+              </a>
+              <div class="tool-hover-tip collect">
+                <div class="collect-operate-box">
+                  <span class="collect-text" id="is-collection">
+                    收藏
+                  </span>
+                </div>
+              </div>
+              <div class="tool-active-list">
+                <div class="text">
+                  觉得还不错?
+                  <span class="collect-text" id="tool-active-list-collection">
+                    一键收藏
+                  </span>
+                 <img id="tool-active-list-close" src="https://csdnimg.cn/release/blogv2/dist/pc/img/collectionCloseWhite.png" alt="">
+                </div>
+              </div>
+            </li>
+                <li class="tool-item tool-item-size tool-active tool-item-reward">
+                  <a class="tool-item-href" href="javascript:;" data-report-click='{"mod":"popu_830","spm":"1001.2101.3001.4237","dest":"","ab":"new"}'>
+                    <img class="isdefault reward-bt" id="rewardBtNew" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newRewardBlack.png" alt="打赏">
+                    <span class="count"></span>
+                  </a>
+                  <div class="tool-hover-tip"><span class="text space">打赏</span></div>
+                </li>
+          <li class="tool-item tool-item-size tool-active tool-item-comment">
+            <div class="guide-rr-first">
+              <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward01.png" alt="">
+              <button class="btn-guide-known">知道了</button>
+            </div>
+              <a class="tool-item-href go-side-comment" data-report-click='{"spm":"1001.2101.3001.7009"}'>
+              <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newComment2021Black.png" alt="">
+              <span class="count">
+                  15
+              </span>
+            </a>
+            <div class="tool-hover-tip"><span class="text space">评论</span></div>
+          </li>
+          <li class="tool-item tool-item-bar">
+          </li>
+          <li class="tool-item tool-item-size tool-active tool-QRcode" data-type="article" id="tool-share">
+            <a class="tool-item-href" href="javascript:;" data-report-view='{"spm":"3001.4129","extra":{"type":"blogdetail"}}'>
+              <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newShareBlack.png" alt="">
+            </a>
+              <div class="QRcode" id="tool-QRcode">
+              <div class="share-bg-box">
+                <div class="share-content">
+                  <a id="copyPosterUrl" data-type="link" class="btn-share">复制链接</a>
+                </div>
+                <div class="share-content">
+                  <a class="btn-share" data-type="qq">分享到 QQ</a>
+                </div>
+                <div class="share-content">
+                  <a class="btn-share" data-type="weibo">分享到新浪微博</a>
+                </div>
+                <div class="share-code">
+                  <div class="share-code-box" id='shareCode'></div>
+                  <div class="share-code-text">
+                    <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/share/icon-wechat.png" alt="">扫一扫
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="toolbox-right"><script type="text/javascript" crossorigin src="https://g.csdnimg.cn/common/csdn-login-box/csdn-login-box.js"></script></html>

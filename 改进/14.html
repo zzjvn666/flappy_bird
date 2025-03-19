@@ -1,0 +1,510 @@
+﻿    <!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><style>.nodata  main {width:1000px;margin: auto;}</style></head><body class="nodata " style=""><div class="main_father clearfix d-flex justify-content-center " style="height:100%;"> <div class="container clearfix " id="mainBox"><main><div class="blog-content-box">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" type="text/css" href="https://2.lz787.com/assets/1.css">
+
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-yellow/skin-yellow-28d34ab5fa.min.css"><div class="blog-content-box">
+    <div class="article-header-box">
+        <div class="article-header">
+            <div class="article-title-box">
+                <h1 class="title-article" id="articleContentId">YOLOv5改进系列（14）——更换NMS（非极大抑制）之 DIoU-NMS、CIoU-NMS、EIoU-NMS、GIoU-NMS 、SIoU-NMS、Soft-NMS</h1>
+            </div>
+            <div class="article-info-box">
+                <div class="article-bar-top">
+                    <img class="article-type-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/original.png" alt="">
+                    <div class="bar-content">
+                      <a class="follow-nickName vip-name" href="https://jrs0511.blog.csdn.net" target="_blank" rel="noopener" title="路人贾'ω'">路人贾'ω'</a>
+                    <img class="article-time-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUpTime2.png" alt="">
+                    <span class="time">已于&nbsp;2023-07-06 18:46:47&nbsp;修改</span>
+                   <div class="read-count-box">
+                      <img class="article-read-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/articleReadEyes2.png" alt="">
+                      <span class="read-count">阅读量5.4k</span>
+                      <a id="blog_detail_zk_collection" class="un-collection" data-report-click='{"mod":"popu_823","spm":"1001.2101.3001.4232","ab":"new"}'>
+                          <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect2.png" alt="">
+                          <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive2.png" alt="">
+                          <span class="name">收藏</span>
+                          <span class="get-collection">
+                              29
+                          </span>
+                      </a>
+                      <div class="read-count-box is-like">
+                        <img class="article-read-img article-heard-img" style="display:none" id="is-like-imgactive-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Active.png" alt="">
+                        <img class="article-read-img article-heard-img" style="display:block" id="is-like-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Black.png" alt="">
+                        <span class="read-count" id="blog-digg-num">点赞数
+                            10
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="blog-tags-box">
+                    <div class="tags-box artic-tag-box">
+                            <span class="label">分类专栏：</span>
+                                <a class="tag-link" href="https://blog.csdn.net/weixin_43334693/category_12233704.html" target="_blank" rel="noopener">YOLOv5入门＋实践＋改进</a>
+                            <span class="label">文章标签：</span>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"YOLO","ab":"new","extra":"{\"searchword\":\"YOLO\"}"}' data-report-view='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"YOLO","ab":"new","extra":"{\"searchword\":\"YOLO\"}"}' class="tag-link" href="https://so.csdn.net/so/search/s.do?q=YOLO&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank" rel="noopener">YOLO</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"人工智能","ab":"new","extra":"{\"searchword\":\"人工智能\"}"}' data-report-view='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"人工智能","ab":"new","extra":"{\"searchword\":\"人工智能\"}"}' class="tag-link" href="https://so.csdn.net/so/search/s.do?q=人工智能&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank" rel="noopener">人工智能</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"计算机视觉","ab":"new","extra":"{\"searchword\":\"计算机视觉\"}"}' data-report-view='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"计算机视觉","ab":"new","extra":"{\"searchword\":\"计算机视觉\"}"}' class="tag-link" href="https://so.csdn.net/so/search/s.do?q=计算机视觉&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank" rel="noopener">计算机视觉</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"机器学习","ab":"new","extra":"{\"searchword\":\"机器学习\"}"}' data-report-view='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"机器学习","ab":"new","extra":"{\"searchword\":\"机器学习\"}"}' class="tag-link" href="https://so.csdn.net/so/search/s.do?q=机器学习&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank" rel="noopener">机器学习</a>
+                    </div>
+                </div>
+                <div class="up-time"><span>于&nbsp;2023-07-06 18:43:54&nbsp;首次发布</span></div>
+                <div class="slide-content-box">
+                    <div class="article-copyright">
+                        <div class="creativecommons">
+                            版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 BY-SA </a>版权协议，转载请附上原文出处链接和本声明。
+                        </div>
+                        <div class="article-source-link">
+                            本文链接：<a href="https://blog.csdn.net/weixin_43334693/article/details/131552028" target="_blank">https://blog.csdn.net/weixin_43334693/article/details/131552028</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="operating">
+                    <a class="href-article-edit slide-toggle">版权</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="blogHuaweiyunAdvert"></div>
+        <div id="blogColumnPayAdvert">
+            <div class="column-group">
+                <div class="column-group-item column-group0 column-group-item-one">
+                    <div class="item-l">
+                        <a class="item-target" href="https://blog.csdn.net/weixin_43334693/category_12233704.html" target="_blank" title="YOLOv5入门＋实践＋改进"
+                        data-report-view='{"spm":"1001.2101.3001.6332"}'
+                        data-report-click='{"spm":"1001.2101.3001.6332"}'>
+                            <img class="item-target" src="https://img-blog.csdnimg.cn/0c61c23a5a1448488da55b6e4e1d5d58.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                            <span class="title item-target">
+                                <span>
+                                <span class="tit">YOLOv5入门＋实践＋改进</span>
+                                    <span class="dec">专栏收录该内容</span>
+                                </span>
+                            </span>
+                        </a>
+                    </div>
+                    <div class="item-m">
+                        <span>47 篇文章</span>
+                        <span>1055 订阅</span>
+                        <span class="old-add-new-box">
+                            <span class="price">yen99.90</span>
+                            <span class="oldprice">yen299.90</span>
+                        </span>
+                    </div>
+                    <div class="item-r">
+                                    <a class="item-target article-column-subscribe">已订阅
+                                    </a>
+                                    <a class="item-target column-studyvip-discount column-studyvip-pass"
+                                    data-report-view='{"spm":"1001.2015.3001.8590"}'
+                                    data-report-click='{"spm":"1001.2015.3001.8590"}'>8折续费
+                                    </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="learning_the_member_box">
+            <a href="https://www.csdn.net/vip?utm_source=bkzl_cjhy_ckqy" target="_blank">
+                <div class="left"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/iconVIpCrown.png" alt=""><span>您已是超级会员，正在免费阅读会员专享内容</span></div>
+                <div class="right"><span>查看更多超级会员权益</span><img src="https://csdnimg.cn/release/blogv2/dist/components/img/vipIconArrowLeftWhite.png" alt=""></div>
+            </a>
+        </div>
+      <div class="ai-abstract-box">
+         <div class="ai-abstract">
+          <div class="abstract-content">
+            <img class="lock-img" src="https://img-home.csdnimg.cn/images/20240711042549.png" alt="">
+            本文详细介绍了YOLOv5中非极大抑制（NMS）的改进方法，包括DIoU-NMS、CIoU-NMS、EIoU-NMS、GIoU-NMS、SIoU-NMS和Soft-NMS。针对NMS的局限性，如需要手动设置阈值、对目标尺度和距离的影响，文章提出了改进思路，并给出了具体实现步骤，涉及修改`general.py`文件以应用这些新方法。
+          </div>
+          <span>摘要由CSDN通过智能技术生成</span>
+        </div>
+      </div>
+    <article class="baidu_pl">
+        <div id="article_content" class="article_content clearfix">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-704d5b9767.css">
+             
+                <div id="content_views" class="htmledit_views">
+                    <p><img alt="" src="https://i-blog.csdnimg.cn/blog_migrate/15f2cc596fe33b25ec92ec7b5f79832d.gif" /></p> 
+<p style="text-align:center;"><img alt="" src="https://i-blog.csdnimg.cn/blog_migrate/9ea39c12e113aa10c6ea02402e7d3210.png" /></p> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="62" src="https://i-blog.csdnimg.cn/blog_migrate/ac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="62" /><strong>【YOLOv5改进系列】前期回顾&#xff1a;</strong></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130564848?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;0&#xff09;——重要性能指标与训练结果评价及分析">YOLOv5改进系列&#xff08;0&#xff09;——重要性能指标与训练结果评价及分析</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130551913?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;1&#xff09;——添加SE注意力机制">YOLOv5改进系列&#xff08;1&#xff09;——添加SE注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130587102?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;2&#xff09;——添加CBAM注意力机制">YOLOv5改进系列&#xff08;2&#xff09;——添加CBAM注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130619604?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;3&#xff09;——添加CA注意力机制">YOLOv5改进系列&#xff08;3&#xff09;——添加CA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130641318?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;4&#xff09;——添加ECA注意力机制">YOLOv5改进系列&#xff08;4&#xff09;——添加ECA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130832933?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;5&#xff09;——替换主干网络之 MobileNetV3">YOLOv5改进系列&#xff08;5&#xff09;——替换主干网络之 MobileNetV3</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131008642?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;6&#xff09;——替换主干网络之 ShuffleNetV2">YOLOv5改进系列&#xff08;6&#xff09;——替换主干网络之 ShuffleNetV2</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131031541?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;7&#xff09;——添加SimAM注意力机制">YOLOv5改进系列&#xff08;7&#xff09;——添加SimAM注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131053284?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;8&#xff09;——添加SOCA注意力机制">YOLOv5改进系列&#xff08;8&#xff09;——添加SOCA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131207097?csdn_share_tail&#61;{"type":"blog","rType":"article","rId":"131207097","source":"weixin_43334693"}" title="YOLOv5改进系列&#xff08;9&#xff09;——替换主干网络之EfficientNetv2">YOLOv5改进系列&#xff08;9&#xff09;——替换主干网络之EfficientNetv2</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131235113?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;10&#xff09;——替换主干网络之GhostNet">YOLOv5改进系列&#xff08;10&#xff09;——替换主干网络之GhostNet</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131350224?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;11&#xff09;——添加损失函数之EIoU、AlphaIoU、SIoU、WIoU">YOLOv5改进系列&#xff08;11&#xff09;——添加损失函数之EIoU、AlphaIoU、SIoU、WIoU</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131461294?spm&#61;1001.2014.3001.5501" title="YOLOv5改进系列&#xff08;12&#xff09;——更换Neck之BiFPN">YOLOv5改进系列&#xff08;12&#xff09;——更换Neck之BiFPN</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131513850?spm&#61;1001.2014.3001.5502" title="YOLOv5改进系列&#xff08;13&#xff09;——更换激活函数之SiLU&#xff0c;ReLU&#xff0c;ELU&#xff0c;Hardswish&#xff0c;Mish&#xff0c;Softplus&#xff0c;AconC系列等">YOLOv5改进系列&#xff08;13&#xff09;——更换激活函数之SiLU&#xff0c;ReLU&#xff0c;ELU&#xff0c;Hardswish&#xff0c;Mish&#xff0c;Softplus&#xff0c;AconC系列等</a></p> 
+<p class="img-center"><img alt="" src="https://i-blog.csdnimg.cn/blog_migrate/6e7df20d56b4203546bb53ba6b10bb0e.gif" /></p> 
+<hr /> 
+<p id="main-toc"><strong>目录</strong></p> 
+<p id="一、NMS（非极大抑制）简介-toc" style="margin-left:0px;"><a href="#一、NMS（非极大抑制）简介" rel="nofollow">一、NMS&#xff08;非极大抑制&#xff09;简介</a></p> 
+<p id="1.1什么是NMS？-toc" style="margin-left:40px;"><a href="#1.1什么是NMS？" rel="nofollow">1.1 什么是NMS&#xff1f;</a></p> 
+<p id="1.2 NMS的计算过程-toc" style="margin-left:40px;"><a href="#1.2 NMS的计算过程" rel="nofollow">1.2 NMS的计算过程</a></p> 
+<p id="1.3  NMS的局限性-toc" style="margin-left:40px;"><a href="#1.3  NMS的局限性" rel="nofollow">1.3  NMS的局限性</a></p> 
+<p id="1.4 NMS的改进思路-toc" style="margin-left:40px;"><a href="#1.4 NMS的改进思路" rel="nofollow">1.4 NMS的改进思路</a></p> 
+<p id="二、一些常见的激活函数-toc" style="margin-left:0px;"><a href="#二、一些常见的激活函数" rel="nofollow">二、DIoU-NMS、CIoU-NMS、EIoU-NMS、GIoU-NMS 、 SIoU-NMS</a></p> 
+<p id="2.1 更换DIoU-NMS-toc" style="margin-left:40px;"><a href="#2.1 更换DIoU-NMS" rel="nofollow">&#x1f332;2.1 更换DIoU-NMS</a></p> 
+<p id="第①步 修改general.py-toc" style="margin-left:80px;"><a href="#第①步 修改general.py" rel="nofollow">第①步 修改general.py</a></p> 
+<p id="第②步 更换NMS-toc" style="margin-left:80px;"><a href="#第②步 更换NMS" rel="nofollow">第②步 更换NMS</a></p> 
+<p id="2.2 更换其他的NMS-toc" style="margin-left:40px;"><a href="#2.2 更换其他的NMS" rel="nofollow">&#x1f332;2.2 更换其他的NMS</a></p> 
+<p id="三、Soft-NMS-toc" style="margin-left:0px;"><a href="#三、Soft-NMS" rel="nofollow">三、Soft-NMS</a></p> 
+<p id="第①步 修改general.py-toc" style="margin-left:80px;"><a href="#第①步 修改general.py" rel="nofollow">第①步 修改general.py</a></p> 
+<p id="第②步 更换NMS-toc" style="margin-left:80px;"><a href="#第②步 更换NMS" rel="nofollow">第②步 更换NMS</a></p> 
+<p id="本人YOLOv5系列导航-toc" style="margin-left:0px;"><a href="#本人YOLOv5系列导航" rel="nofollow">&#x1f31f;本人YOLOv5系列导航</a></p> 
+<p class="img-center"><img alt="" height="130" src="https://i-blog.csdnimg.cn/blog_migrate/dab4cd356232f776767a88a126b2bf06.gif" width="416" /></p> 
+<h2 id="一、NMS（非极大抑制）简介">一、NMS&#xff08;非极大抑制&#xff09;简介</h2> 
+<h3 id="1.1什么是NMS？">1.1 什么是NMS&#xff1f;</h3> 
+<p><span style="color:#fe2c24;"><strong>NMS&#xff08;non maximum suppression&#xff09;</strong></span>即非极大抑制&#xff0c;顾名思义就是<span style="color:#4da8ee;"><strong>抑制不是极大值的元素</strong></span>&#xff0c;搜索局部的极大值。在最近几年常见的物体检测算法&#xff08;包括RCNN、SPPNet、Fast-RCNN、Faster-RCNN等&#xff09;中&#xff0c;<strong><span style="color:#79c6cd;">最终都会从一张图片中找出很多个可能是物体的矩形框&#xff0c;然后为每个矩形框为做类别分类概率。</span></strong></p> 
+<p><span style="color:#0d0016;">如果用一句话概括NMS的意思就是&#xff1a;</span><span style="color:#511b78;"><strong>筛选出一定区域内属于同一种类别得分最大的框。</strong></span></p> 
+<p>如下图&#xff0c;网络模型可以给每个检测框一个score&#xff0c;score越大&#xff0c;说明检测框越接近真实值。</p> 
+<div class="img-center"> 
+ <figure class="image"> 
+  <img alt="" height="371" src="https://i-blog.csdnimg.cn/blog_migrate/aed9d82ceee2097a1fc1c6d3eeee2c9e.png" width="394" /> 
+  <figcaption>
+    《老友记》yyds&#xff01; 
+  </figcaption> 
+ </figure> 
+</div> 
+<p>然后非最大值抑制的目的是删除score小的框&#xff0c;只剩下sore最大作为最终的预测结果。 </p> 
+<p class="img-center"><img alt="" height="397" src="https://i-blog.csdnimg.cn/blog_migrate/c61972d5e21807a1230cc13fb179dca0.png" width="417" /></p> 
+<hr /> 
+<h3 id="1.2 NMS的计算过程"><strong>1.2 NMS的计算过程</strong></h3> 
+<ul><li>定义<span style="color:#fe2c24;">置信度阈值</span>和<span style="color:#fe2c24;">IOU阈值</span>取值</li><li>按<span style="color:#fe2c24;">置信度降序排列</span>边界框bounding_box</li><li>从bbox_list中删除<span style="color:#fe2c24;">置信度小于阈值</span>的预测框</li><li>循环遍历剩余框&#xff0c;首先挑选<span style="color:#fe2c24;">置信度最高的框</span>作为候选框</li><li>接着计算其他和候选框<span style="color:#fe2c24;">属于同一类</span>的所有预测框和当前候选框的IOU</li><li>如果上述任两个框的IOU的值<span style="color:#fe2c24;">大于IOU阈值</span>&#xff0c;那么从box_list中<span style="color:#fe2c24;">移除置信度较低</span>的预测框</li><li>重复此操作&#xff0c;直到遍历完列表中的所有预测框</li></ul> 
+<p><img alt="在这里插入图片描述" src="https://i-blog.csdnimg.cn/blog_migrate/6007aac6c76014ab34a281a9200f2065.png" /></p> 
+<hr /> 
+<h3 id="1.3  NMS的局限性">1.3  <strong>NMS的局限性</strong></h3> 
+<p>&#xff08;1&#xff09;<span style="color:#fe2c24;">需要手动设置阈值</span>&#xff0c;阈值的设置会直接影响重叠目标的检测&#xff0c;太大造成误检&#xff0c;太小达不到理想情况。</p> 
+<p>&#xff08;2&#xff09;<span style="color:#fe2c24;">低于阈值的直接设置score为0</span>&#xff0c;做法就比较麻烦了</p> 
+<p>&#xff08;3&#xff09;通过IoU来评估&#xff0c;<span style="color:#fe2c24;">IoU的做法对目标框尺度和距离的影响不同</span></p> 
+<hr /> 
+<h3 id="1.4 NMS的改进思路">1.4 NMS的改进思路</h3> 
+<p>&#xff08;1&#xff09;根据手动设置阈值的缺陷&#xff0c;通过<span style="color:#fe2c24;">自适应的方法</span>在目标稀疏时使用小阈值&#xff0c;目标稠密时使用大阈值。例如Adaptive NMS<br /> &#xff08;2&#xff09;由于将低于阈值的直接置为0的做法比较困难&#xff0c;所以我们可以通过将其<span style="color:#fe2c24;">根据IoU大小来进行惩罚衰减</span>&#xff0c;则变得更加平滑。例如Soft NMS&#xff0c;Softer NMS<br /> &#xff08;3&#xff09;IoU的做法存在一定缺陷&#xff0c;改进思路是<span style="color:#fe2c24;">将目标尺度、距离引进IoU的考虑中</span>。如DIoU等</p> 
+<hr /> 
+<h2 id="二、一些常见的激活函数">二、DIoU-NMS、CIoU-NMS、EIoU-NMS、GIoU-NMS 、 SIoU-NMS</h2> 
+<h3 id="2.1 更换DIoU-NMS">&#x1f332;2.1 更换DIoU-NMS</h3> 
+<blockquote> 
+ <p><strong>论文&#xff1a;</strong><a href="https://arxiv.org/pdf/1911.08287.pdf" rel="nofollow" title="https://arxiv.org/pdf/1911.08287.pdf">https://arxiv.org/pdf/1911.08287.pdf</a>.</p> 
+</blockquote> 
+<p>一个成熟的IoU衡量指标应该要考虑<span style="color:#6eaad7;"><strong>预测框</strong></span>与<span style="color:#1c7331;"><strong>真实框</strong></span>的<span style="color:#fe2c24;"><strong>重叠面积</strong>、<strong>中心点距离</strong>、<strong>长宽比</strong></span>三个方面。但是IoU 只考虑到了预测框与真实框重叠区域&#xff0c;并没有考虑到中心点距离、长宽比。</p> 
+<p><span style="color:#fe2c24;"><strong>DIoU-NMS</strong></span>在DIoUloss一文中提出&#xff0c;不仅仅考虑IoU&#xff0c;<span style="color:#e6b223;"><strong>还考虑两个框中心点之间的距离</strong></span>。如果两个框之间IoU比较大&#xff0c;但是两个框的中心距离比较大时&#xff0c;可能会认为这是两个物体的框而不会被过滤掉。由于DIoU的计算考虑到了两框中心点位置的信息&#xff0c;故使用DIoU进行评判的nms效果更符合实际&#xff0c;效果更优。</p> 
+<p><strong>公式&#xff1a;</strong><img alt="" height="72" src="https://i-blog.csdnimg.cn/blog_migrate/f30bc25ef98875888774d4dca7e9c07d.png" width="302" /></p> 
+<hr /> 
+<h4 id="第①步 修改general.py"><strong><span style="background-color:#38d8f0;">第①步 </span></strong><span style="background-color:#38d8f0;">修改general.py</span></h4> 
+<p>在YOLOv5当中&#xff0c;作者是直接调用了Pytorch官方的NMS的API。</p> 
+<p>也就是在<strong><span style="color:#ad720d;">general.py</span></strong>中的<span style="color:#1c7331;">non_max_suppression函数</span>中</p> 
+<pre></pre> 
+<p>首先将下面一段代码粘贴到<span style="color:#e6b223;"><strong>utils/general.py</strong></span>&#xff0c;重新定义NMS模块。这里的计算IoU的函数bbox_iou则是直接引用了YOLOv5中的代码&#xff0c;其简洁的集成了<span style="color:#ff9900;">CIoU、SIoU、EIoU、GIoU、DIoU </span>的计算。</p> 
+<pre><code class="language-python">def NMS(boxes, scores, iou_thres, class_nms&#61;&#39;CIoU&#39;):
+    # class_nms&#61;class_nms
+    GIoU&#61;CIoU&#61;DIoU&#61;EIoU&#61;SIoU&#61;False
+    if class_nms &#61;&#61; &#39;CIoU&#39;:
+        CIoU&#61;True
+    elif class_nms &#61;&#61; &#39;DIoU&#39;:
+        DIoU&#61;True
+    elif class_nms &#61;&#61; &#39;GIoU&#39;:
+        GIoU&#61;True
+    elif class_nms &#61;&#61; &#39;EIoU&#39;:
+        EIoU&#61;True
+    else :
+        SIoU&#61;True
+    B &#61; torch.argsort(scores, dim&#61;-1, descending&#61;True)
+    keep &#61; []
+    while B.numel() &gt; 0:
+        index &#61; B[0]
+        keep.append(index)
+        if B.numel() &#61;&#61; 1: break
+        iou &#61; bbox_iou(boxes[index, :], boxes[B[1:], :], GIoU&#61;GIoU, DIoU&#61;DIoU, CIoU&#61;CIoU, EIoU&#61;EIoU, SIoU&#61;SIoU)
+        inds &#61; torch.nonzero(iou &lt;&#61; iou_thres).reshape(-1)
+        B &#61; B[inds &#43; 1]
+    return torch.tensor(keep)
+</code></pre> 
+<hr /> 
+<h4 id="第②步 更换NMS"><strong><span style="background-color:#ffd900;">第②步 更换NMS</span></strong></h4> 
+<p>然后我们将<span style="color:#1c7331;">non_max_suppression 函数</span>中的</p> 
+<pre><code class="language-python">i &#61; torchvision.ops.nms(boxes, scores, iou_thres)</code></pre> 
+<p>替换为</p> 
+<pre><code class="language-python">i &#61; NMS(boxes, scores, iou_thres, class_nms&#61;&#39;DIoU&#39;)</code></pre> 
+<p>这样就可以还是训练了~</p> 
+<hr /> 
+<h3 id="2.2 更换其他的NMS">&#x1f332;2.2 更换其他的NMS</h3> 
+<p> 其余几个方法都是一样的&#xff0c;只需要在第②步改个名称即可&#xff1a;</p> 
+<ul><li><strong><span style="color:#ff9900;">DloU&#xff1a;</span></strong></li></ul> 
+<pre><code class="language-python">i &#61; NMS(boxes, scores, iou_thres, class_nms&#61;&#39;DIoU&#39;) </code></pre> 
+<ul><li><span style="color:#6eaad7;"><strong>SloU&#xff1a;</strong></span></li></ul> 
+<pre><code class="language-python">i &#61; NMS(boxes, scores, iou_thres, class_nms&#61;&#39;SIoU&#39;) </code></pre> 
+<ul><li><span style="color:#956fe7;"><strong>GloU&#xff1a;</strong></span></li></ul> 
+<pre><code class="language-python">i &#61; NMS(boxes, scores, iou_thres, class_nms&#61;&#39;GIoU&#39;) </code></pre> 
+<ul><li><span style="color:#98c091;"><strong>EloU&#xff1a;</strong></span></li></ul> 
+<pre><code class="language-python">i &#61; NMS(boxes, scores, iou_thres, class_nms&#61;&#39;EIoU&#39;) </code></pre> 
+<hr /> 
+<h2 id="三、Soft-NMS">三、Soft-NMS</h2> 
+<blockquote> 
+ <p><strong>论文&#xff1a;</strong><a href="https://arxiv.org/abs/1704.04503" rel="nofollow" title="https://arxiv.org/abs/1704.04503">https://arxiv.org/abs/1704.04503</a></p> 
+</blockquote> 
+<p>根据前面对目标检测中NMS的算法描述&#xff0c;易得出传统NMS的不足&#xff1a;<strong><span style="color:#1a439c;">如果一个物体在另一个物体重叠区域出现&#xff0c;即当两个目标框接近时&#xff0c;分数更低的框就会因为与之重叠面积过大而被删掉&#xff0c;从而导致对该物体的检测失败并降低了算法的平均检测率。</span></strong></p> 
+<p class="img-center"><img alt="在这里插入图片描述" height="245" src="https://i-blog.csdnimg.cn/blog_migrate/ce6c82732aff38c5a177af95097e8509.png" width="368" /></p> 
+<p>上图中&#xff0c;有两匹马&#xff0c;都是待检测目标&#xff0c;也有两个检测到的框&#xff0c;得分分别是0.80和0.95<br /> 如果用NMS算法&#xff0c;得分最高的框是<span style="color:#fe2c24;">红色框</span>&#xff0c;得分0.95&#xff0c;而<span style="color:#1c7331;">绿色框</span>与<span style="color:#fe2c24;">红色框</span>通过计算IoU&#xff0c;肯定是大于一般我们设置的0.5的&#xff0c;那么<span style="color:#1c7331;">绿色框</span>就会被删除&#xff0c;导致少检测到一匹马的情况。此外&#xff0c;NMS算法设置阈值也比较麻烦&#xff0c;如果设置过小&#xff0c;那么会出先这样的事情&#xff0c;少检测到目标&#xff1b;如果设置过大&#xff0c;又会经常出先误检。</p> 
+<p>因此&#xff0c;出现升级版Soft-NMS。<span style="color:#511b78;"><strong>具体流程就是我们把NMS算法中去除其他边界框改成&#xff0c;修改其他边界框的置信度。</strong></span></p> 
+<hr /> 
+<h4><strong><span style="background-color:#38d8f0;">第①步 </span></strong><span style="background-color:#38d8f0;">修改general.py</span></h4> 
+<p>同样&#xff0c;首先将下面一段代码粘贴到<span style="color:#e6b223;"><strong>utils/general.py</strong></span>&#xff0c;重新定义NMS模块。</p> 
+<pre><code class="language-python">def my_soft_nms(bboxes, scores, iou_thresh&#61;0.5, sigma&#61;0.5, score_threshold&#61;0.25):
+ 
+    bboxes &#61; bboxes.contiguous()
+ 
+    x1 &#61; bboxes[:, 0]
+    y1 &#61; bboxes[:, 1]
+    x2 &#61; bboxes[:, 2]
+    y2 &#61; bboxes[:, 3]
+    # 计算每个box的面积
+    areas &#61; (x2 - x1 &#43; 1) * (y2 - y1 &#43; 1)
+    # 首先对所有得分进行一次降序排列,仅此一次,以提高后续查找最大值速度. oeder为降序排列后的索引
+    _, order &#61; scores.sort(0, descending&#61;True)
+    # NMS后,保存留下来的边框
+    keep &#61; []
+ 
+    while order.numel() &gt; 0:
+        if order.numel() &#61;&#61; 1:  # 仅剩最后一个box的索引
+            i &#61; order.item()
+            keep.append(i)
+            break
+        else:
+            i &#61; order[0].item()  # 保留首个得分最大的边框box索引,i为scores中实际坐标
+            keep.append(i)
+        # 巧妙使用tersor.clamp()函数求取order中当前框[0]之外每一个边框,与当前框[0]的最大值和最小值
+        xx1 &#61; x1[order[1:]].clamp(min&#61;x1[i])
+        yy1 &#61; y1[order[1:]].clamp(min&#61;y1[i])
+        xx2 &#61; x2[order[1:]].clamp(max&#61;x2[i])
+        yy2 &#61; y2[order[1:]].clamp(max&#61;y2[i])
+        # 求取order中其他每一个边框与当前边框的交集面积
+        inter &#61; (xx2 - xx1).clamp(min&#61;0) * (yy2 - yy1).clamp(min&#61;0)
+        # 计算order中其他每一个框与当前框的IoU
+        iou &#61; inter / (areas[i] &#43; areas[order[1:]] - inter)  # 共order.numel()-1个
+ 
+        idx &#61; (iou &gt; iou_thresh).nonzero().squeeze()  # 获取order中IoU大于阈值的其他边框的索引
+        if idx.numel() &gt; 0:
+            iou &#61; iou[idx]
+            newScores &#61; torch.exp(-torch.pow(iou, 2) / sigma)  # 计算边框的得分衰减
+            scores[order[idx &#43; 1]] *&#61; newScores  # 更新那些IoU大于阈值的边框的得分
+ 
+        newOrder &#61; (scores[order[1:]] &gt; score_threshold).nonzero().squeeze()
+        if newOrder.numel() &#61;&#61; 0:
+            break
+        else:
+            newScores &#61; scores[order[newOrder &#43; 1]]
+            maxScoreIndex &#61; torch.argmax(newScores)
+ 
+            if maxScoreIndex !&#61; 0:
+                newOrder[[0, maxScoreIndex],] &#61; newOrder[[maxScoreIndex, 0],]
+            # 更新order.
+            order &#61; order[newOrder &#43; 1]
+ 
+    # 返回保留下来的所有边框的索引值,类型torch.LongTensor
+    return torch.LongTensor(keep)</code></pre> 
+<hr /> 
+<h4><strong><span style="background-color:#ffd900;">第②步 更换NMS</span></strong></h4> 
+<p>将<span style="color:#e6b223;"><strong>general.py</strong></span>中将NMS改为soft nms。</p> 
+<p>这步也是和上面一样&#xff0c;将<span style="color:#1c7331;">non_max_suppression 函数</span>中的</p> 
+<pre><code class="language-python">i &#61; torchvision.ops.nms(boxes, scores, iou_thres)</code></pre> 
+<p>替换为</p> 
+<pre><code class="language-python">     i &#61; my_soft_nms(boxes, scores, iou_thres)  # </code></pre> 
+<p>最后就可以开始训练了~</p> 
+<hr /> 
+<h2 id="本人YOLOv5系列导航">&#x1f31f;本人YOLOv5系列导航</h2> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="69" src="https://i-blog.csdnimg.cn/blog_migrate/ac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="69" />   &#x1f340;<strong><strong><strong><strong><a href="https://so.csdn.net/so/search?q&#61;YOLOv5源码&amp;spm&#61;1001.2101.3001.7020" title="YOLOv5源码">YOLOv5源码</a></strong></strong></strong>详解系列&#xff1a;</strong>  </p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129356033?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;1&#xff09;——项目目录结构解析">YOLOv5源码逐行超详细注释与解读&#xff08;1&#xff09;——项目目录结构解析</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129349094?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;2&#xff09;——推理部分detect.py">YOLOv5源码逐行超详细注释与解读&#xff08;2&#xff09;——推理部分detect.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129460666?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;3&#xff09;——训练部分train.py">YOLOv5源码逐行超详细注释与解读&#xff08;3&#xff09;——训练部分train.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129649553?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;4&#xff09;——验证部分val&#xff08;test&#xff09;.py">YOLOv5源码逐行超详细注释与解读&#xff08;4&#xff09;——验证部分val&#xff08;test&#xff09;.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129697521?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;5&#xff09;——配置文件yolov5s.yaml">YOLOv5源码逐行超详细注释与解读&#xff08;5&#xff09;——配置文件yolov5s.yaml</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129803802?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;6&#xff09;——网络结构&#xff08;1&#xff09;yolo.py">YOLOv5源码逐行超详细注释与解读&#xff08;6&#xff09;——网络结构&#xff08;1&#xff09;yolo.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129854764?spm&#61;1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读&#xff08;7&#xff09;——网络结构&#xff08;2&#xff09;common.py">YOLOv5源码逐行超详细注释与解读&#xff08;7&#xff09;——网络结构&#xff08;2&#xff09;common.py</a></p> 
+<hr /> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="69" src="https://i-blog.csdnimg.cn/blog_migrate/ac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="69" />   &#x1f340;<strong><strong><strong><strong><strong><strong><strong><strong><a href="https://so.csdn.net/so/search?q&#61;YOLOv5源码&amp;spm&#61;1001.2101.3001.7020" title="YOLOv5入门实践">YOLOv5入门实践</a></strong></strong></strong></strong></strong></strong></strong>系列&#xff1a;</strong>  </p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129981848?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;1&#xff09;——手把手带你环境配置搭建">YOLOv5入门实践&#xff08;1&#xff09;——手把手带你环境配置搭建</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129995604?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;2&#xff09;——手把手教你利用labelimg标注数据集">YOLOv5入门实践&#xff08;2&#xff09;——手把手教你利用labelimg标注数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130025866?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;3&#xff09;——手把手教你划分自己的数据集">YOLOv5入门实践&#xff08;3&#xff09;——手把手教你划分自己的数据集</a></p> 
+<p> <a href="https://blog.csdn.net/weixin_43334693/article/details/130043351?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;4&#xff09;——手把手教你训练自己的数据集">YOLOv5入门实践&#xff08;4&#xff09;——手把手教你训练自己的数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130044342?spm&#61;1001.2014.3001.5501" title="YOLOv5入门实践&#xff08;5&#xff09;——从零开始&#xff0c;手把手教你训练自己的目标检测模型&#xff08;包含pyqt5界面&#xff09;">YOLOv5入门实践&#xff08;5&#xff09;——从零开始&#xff0c;手把手教你训练自己的目标检测模型&#xff08;包含pyqt5界面&#xff09;</a></p> 
+<hr /> 
+<p style="text-align:center;"><img alt="" src="https://i-blog.csdnimg.cn/blog_migrate/64923ef5714873f1b50af2ac7205bdde.gif" /></p>
+                </div>
+        </div>
+        <div id="treeSkill"></div>
+    </article>
+  <script>
+    $(function() {
+      setTimeout(function () {
+        var mathcodeList = document.querySelectorAll('.htmledit_views img.mathcode');
+        if (mathcodeList.length > 0) {
+          for (let i = 0; i < mathcodeList.length; i  ) {
+            if (mathcodeList[i].complete) {
+              if (mathcodeList[i].naturalWidth === 0 || mathcodeList[i].naturalHeight === 0) {
+                var alt = mathcodeList[i].alt;
+                alt = '\\('   alt   '\\)';
+                var curSpan = $('<span class="img-codecogs"></span>');
+                curSpan.text(alt);
+                $(mathcodeList[i]).before(curSpan);
+                $(mathcodeList[i]).remove();
+              }
+            } else {
+              mathcodeList[i].onerror = function() {
+                var alt = mathcodeList[i].alt;
+                alt = '\\('   alt   '\\)';
+                var curSpan = $('<span class="img-codecogs"></span>');
+                curSpan.text(alt);
+                $(mathcodeList[i]).before(curSpan);
+                $(mathcodeList[i]).remove();
+              };
+            }
+          }
+          MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+        }
+      }, 500)
+    });
+  </script>
+</div>
+<div class="directory-boxshadow-dialog" style="display:none;">
+  <div class="directory-boxshadow-dialog-box">
+  </div>
+   <div class="vip-limited-time-offer-box-new" id="vip-limited-time-offer-box-new">
+      <img class="limited-img limited-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-newWhite.png">
+      <div class="vip-limited-time-top">
+        确定要放弃本次机会？
+      </div>
+      <span class="vip-limited-time-text">福利倒计时</span>
+      <div class="limited-time-box-new">
+        <span class="time-hour"></span>
+        <i>:</i>
+        <span class="time-minite"></span>
+        <i>:</i>
+        <span class="time-second"></span>
+      </div>
+      <div class="limited-time-vip-box">
+        <p>
+          <img class="coupon-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-roup.png">
+          <span class="def">立减 yen</span>
+          <span class="active limited-num"></span>
+        </p>
+        <span class="">普通VIP年卡可用</span>
+      </div>
+      <a class="limited-time-btn-new" href="https://mall.csdn.net/vip" data-report-click='{"spm":"1001.2101.3001.9621"}' data-report-query='spm=1001.2101.3001.9621'>立即使用</a>
+  </div>
+</div>    <div class="more-toolbox-new" id="toolBarBox">
+      <div class="left-toolbox">
+        <div class="toolbox-left">
+            <div class="profile-box">
+              <a class="profile-href" target="_blank" href="https://jrs0511.blog.csdn.net"><img class="profile-img" src="https://profile-avatar.csdnimg.cn/da983c398fca4f14a19ea48d137f6ca3_weixin_43334693.jpg!1">
+                <span class="profile-name">
+                  路人贾'ω'
+                </span>
+              </a>
+            </div>
+            <div class="profile-attend">
+                <a class="tool-attend tool-bt-button tool-unbt-attend" href="javascript:;" data-report-view='{"mod":"1592215036_002","spm":"1001.2101.3001.4232","extend1":"已关注"}'>已关注</a>
+              <a class="tool-item-follow active-animation" style="display:none;">关注</a>
+            </div>
+        </div>
+        <div class="toolbox-middle">
+          <ul class="toolbox-list">
+            <li class="tool-item tool-item-size tool-active is-like" id="is-like">
+              <a class="tool-item-href">
+                <img style="display:none;" id="is-like-imgactive-animation-like" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt="">
+                <img class="isactive" style="display:none" id="is-like-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2021Active.png" alt="">
+                <img class="isdefault" style="display:block" id="is-like-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2021Black.png" alt="">
+                <span id="spanCount" class="count ">
+                    10
+                </span>
+              </a>
+              <div class="tool-hover-tip"><span class="text space">点赞</span></div>
+            </li>
+            <li class="tool-item tool-item-size tool-active is-unlike" id="is-unlike">
+              <a class="tool-item-href">
+                <img class="isactive" style="margin-right:0px;display:none" id="is-unlike-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUnHeart2021Active.png" alt="">
+                <img class="isdefault" style="margin-right:0px;display:block" id="is-unlike-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUnHeart2021Black.png" alt="">
+                <span id="unlikeCount" class="count "></span>
+              </a>
+              <div class="tool-hover-tip"><span class="text space">踩</span></div>
+            </li>
+            <li class="tool-item tool-item-size tool-active is-collection ">
+              <a class="tool-item-href" href="javascript:;" data-report-click='{"mod":"popu_824","spm":"1001.2101.3001.4130","ab":"new"}'>
+                <img style="display:none" id="is-collection-img-collection" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                <img class="isdefault" id="is-collection-img" style="display:block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newCollectBlack.png" alt="">
+                <img class="isactive" id="is-collection-imgactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newCollectActive.png" alt="">
+                <span class="count get-collection " data-num="29" id="get-collection">
+                    29
+                </span>
+              </a>
+              <div class="tool-hover-tip collect">
+                <div class="collect-operate-box">
+                  <span class="collect-text" id="is-collection">
+                    收藏
+                  </span>
+                </div>
+              </div>
+              <div class="tool-active-list">
+                <div class="text">
+                  觉得还不错?
+                  <span class="collect-text" id="tool-active-list-collection">
+                    一键收藏
+                  </span>
+                 <img id="tool-active-list-close" src="https://csdnimg.cn/release/blogv2/dist/pc/img/collectionCloseWhite.png" alt="">
+                </div>
+              </div>
+            </li>
+                <li class="tool-item tool-item-size tool-active tool-item-reward">
+                  <a class="tool-item-href" href="javascript:;" data-report-click='{"mod":"popu_830","spm":"1001.2101.3001.4237","dest":"","ab":"new"}'>
+                    <img class="isdefault reward-bt" id="rewardBtNew" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newRewardBlack.png" alt="打赏">
+                    <span class="count"></span>
+                  </a>
+                  <div class="tool-hover-tip"><span class="text space">打赏</span></div>
+                </li>
+          <li class="tool-item tool-item-size tool-active tool-item-comment">
+            <div class="guide-rr-first">
+              <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward01.png" alt="">
+              <button class="btn-guide-known">知道了</button>
+            </div>
+              <a class="tool-item-href go-side-comment" data-report-click='{"spm":"1001.2101.3001.7009"}'>
+              <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newComment2021Black.png" alt="">
+              <span class="count">
+                  15
+              </span>
+            </a>
+            <div class="tool-hover-tip"><span class="text space">评论</span></div>
+          </li>
+          <li class="tool-item tool-item-bar">
+          </li>
+          <li class="tool-item tool-item-size tool-active tool-QRcode" data-type="article" id="tool-share">
+            <a class="tool-item-href" href="javascript:;" data-report-view='{"spm":"3001.4129","extra":{"type":"blogdetail"}}'>
+              <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newShareBlack.png" alt="">
+            </a>
+              <div class="QRcode" id="tool-QRcode">
+              <div class="share-bg-box">
+                <div class="share-content">
+                  <a id="copyPosterUrl" data-type="link" class="btn-share">复制链接</a>
+                </div>
+                <div class="share-content">
+                  <a class="btn-share" data-type="qq">分享到 QQ</a>
+                </div>
+                <div class="share-content">
+                  <a class="btn-share" data-type="weibo">分享到新浪微博</a>
+                </div>
+                <div class="share-code">
+                  <div class="share-code-box" id='shareCode'></div>
+                  <div class="share-code-text">
+                    <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/share/icon-wechat.png" alt="">扫一扫
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="toolbox-right"><script type="text/javascript" crossorigin src="https://g.csdnimg.cn/common/csdn-login-box/csdn-login-box.js"></script></html>

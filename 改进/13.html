@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+      <html lang="zh-CN">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-2fe393ff58.min.css">
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-704d5b9767.css">
+        <style>
+          body {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+          }
+          img {
+            max-width: 100%;
+            height: auto;
+          }
+          pre {
+            background-color: #e4dfdf;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+          }
+          code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+          }
+          blockquote {
+            background: #f9f9f9;
+            border-left: 10px solid #ccc;
+            margin: 1.5em 10px;
+            padding: 0.5em 10px;
+          }
+          table {
+            border-collapse: collapse;
+            width: 100%;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+          }
+          th {
+            background-color: #f2f2f2;
+          }
+        </style>
+      </head>
+      <body>
+          <div class="blog-content-box">
+            <div id="article_content" class="article_content clearfix">
+              <div id="content_views" class="htmledit_views">
+                
+                <!-- https://jrs0511.blog.csdn.net/article/details/131513850 -->
+<!-- https://jrs0511.blog.csdn.net/article/details/131513850  YOLOv5改进系列（13）——更换激活函数之SiLU，ReLU，ELU，Hardswish，Mish，Softplus，AconC系列等_olov5改进系列(13)——更换激活函数之silu,relu,elu,hardswish,…-CSDN博客 --> 
+
+                    <h2 id="articleContentId" style="text-align:center;"><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F48e585e38350110b9c34346851458120.gif"></h2> 
+<p style="text-align:center;"><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F2f71e907dd7066c3099f6ef050a4ba42.png"></p> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="62" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="62"><strong>【YOLOv5改进系列】前期回顾：</strong></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130564848?spm=1001.2014.3001.5501" title="YOLOv5改进系列（0）——重要性能指标与训练结果评价及分析">YOLOv5改进系列（0）——重要性能指标与训练结果评价及分析</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130551913?spm=1001.2014.3001.5501" title="YOLOv5改进系列（1）——添加SE注意力机制">YOLOv5改进系列（1）——添加SE注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130587102?spm=1001.2014.3001.5501" title="YOLOv5改进系列（2）——添加CBAM注意力机制">YOLOv5改进系列（2）——添加CBAM注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130619604?spm=1001.2014.3001.5501" title="YOLOv5改进系列（3）——添加CA注意力机制">YOLOv5改进系列（3）——添加CA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130641318?spm=1001.2014.3001.5501" title="YOLOv5改进系列（4）——添加ECA注意力机制">YOLOv5改进系列（4）——添加ECA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130832933?spm=1001.2014.3001.5501" title="YOLOv5改进系列（5）——替换主干网络之 MobileNetV3">YOLOv5改进系列（5）——替换主干网络之 MobileNetV3</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131008642?spm=1001.2014.3001.5501" title="YOLOv5改进系列（6）——替换主干网络之 ShuffleNetV2">YOLOv5改进系列（6）——替换主干网络之 ShuffleNetV2</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131031541?spm=1001.2014.3001.5501" title="YOLOv5改进系列（7）——添加SimAM注意力机制">YOLOv5改进系列（7）——添加SimAM注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131053284?spm=1001.2014.3001.5501" title="YOLOv5改进系列（8）——添加SOCA注意力机制">YOLOv5改进系列（8）——添加SOCA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131207097?csdn_share_tail=%7B%22type%22%3A%22blog%22%2C%22rType%22%3A%22article%22%2C%22rId%22%3A%22131207097%22%2C%22source%22%3A%22weixin_43334693%22%7D" title="YOLOv5改进系列（9）——替换主干网络之EfficientNetv2">YOLOv5改进系列（9）——替换主干网络之EfficientNetv2</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131235113?spm=1001.2014.3001.5501" title="​​​​​​YOLOv5改进系列（10）——替换主干网络之GhostNet">​​​​​​YOLOv5改进系列（10）——替换主干网络之GhostNet</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131350224?spm=1001.2014.3001.5501" title="YOLOv5改进系列（11）——添加损失函数之EIoU、AlphaIoU、SIoU、WIoU">YOLOv5改进系列（11）——添加损失函数之EIoU、AlphaIoU、SIoU、WIoU</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131461294?spm=1001.2014.3001.5501" title="YOLOv5改进系列（12）——更换Neck之BiFPN">YOLOv5改进系列（12）——更换Neck之BiFPN</a></p> 
+<p class="img-center"><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F6e7df20d56b4203546bb53ba6b10bb0e.gif"></p> 
+<hr> 
+<p id="main-toc"><strong>目录</strong></p> 
+<p id="%F0%9F%8C%B2%E4%B8%80%E3%80%81%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E7%AE%80%E4%BB%8B-toc" style="margin-left:0px;"><a href="#%F0%9F%8C%B2%E4%B8%80%E3%80%81%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E7%AE%80%E4%BB%8B" rel="nofollow">🌲一、激活函数的简介</a></p> 
+<p id="%F0%9F%8C%BB1.1%20%E4%BB%80%E4%B9%88%E6%98%AF%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%EF%BC%9F-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB1.1%20%E4%BB%80%E4%B9%88%E6%98%AF%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%EF%BC%9F" rel="nofollow">1.1 什么是激活函数？</a></p> 
+<p id="%F0%9F%8C%BB1.2%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB1.2%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F" rel="nofollow">1.2 激活函数有什么用？</a></p> 
+<p id="%F0%9F%8C%B2%E4%BA%8C%E3%80%81%E4%B8%80%E4%BA%9B%E5%B8%B8%E8%A7%81%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:0px;"><a href="#%F0%9F%8C%B2%E4%BA%8C%E3%80%81%E4%B8%80%E4%BA%9B%E5%B8%B8%E8%A7%81%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌲二、一些常见的激活函数</a></p> 
+<p id="%F0%9F%8C%BB2.1%20sigmoid%E5%87%BD%E6%95%B0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.1%20sigmoid%E5%87%BD%E6%95%B0" rel="nofollow">🌻2.1 sigmoid函数</a></p> 
+<p id="%F0%9F%8C%BB2.2%20tanh%20%2F%20%E5%8F%8C%E6%9B%B2%E6%AD%A3%E5%88%87%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.2%20tanh%20%2F%20%E5%8F%8C%E6%9B%B2%E6%AD%A3%E5%88%87%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌻2.2 tanh / 双曲正切激活函数</a></p> 
+<p id="%F0%9F%8C%BB2.3%C2%A0ReLU%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.3%C2%A0ReLU%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌻2.3&nbsp;ReLU激活函数</a></p> 
+<p id="%F0%9F%8C%BB2.4%20SiLU%C2%A0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.4%20SiLU%C2%A0" rel="nofollow">🌻2.4 SiLU&nbsp;</a></p> 
+<p id="%F0%9F%8C%BB2.5%20swish%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.5%20swish%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌻2.5 swish激活函数</a></p> 
+<p id="%F0%9F%8C%BB2.6%C2%A0hardswish%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.6%C2%A0hardswish%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌻2.6&nbsp;hardswish激活函数</a></p> 
+<p id="%F0%9F%8C%BB2.7%C2%A0Mish%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.7%C2%A0Mish%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌻2.7&nbsp;Mish激活函数</a></p> 
+<p id="%F0%9F%8C%BB2.8%C2%A0ELU%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.8%C2%A0ELU%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌻2.8&nbsp;ELU激活函数</a></p> 
+<p id="%F0%9F%8C%BB2.9%C2%A0AconC%2FMetaAconC%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.9%C2%A0AconC%2FMetaAconC%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌻2.9&nbsp;AconC/MetaAconC激活函数</a></p> 
+<p id="%F0%9F%8C%BB2.10%C2%A0Softplus%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:40px;"><a href="#%F0%9F%8C%BB2.10%C2%A0Softplus%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌻2.10&nbsp;Softplus激活函数</a></p> 
+<p id="%F0%9F%8C%B2%E4%B8%89%E3%80%81%E6%9B%B4%E6%8D%A2%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E6%AD%A5%E9%AA%A4-toc" style="margin-left:0px;"><a href="#%F0%9F%8C%B2%E4%B8%89%E3%80%81%E6%9B%B4%E6%8D%A2%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E6%AD%A5%E9%AA%A4" rel="nofollow">🌲三、更换激活函数的步骤</a></p> 
+<p id="%E7%AC%AC%E2%91%A0%E6%AD%A5%20%E6%89%93%E5%BC%80activations.py%E6%96%87%E4%BB%B6%EF%BC%8C%E6%9F%A5%E7%9C%8B%E5%B7%B2%E6%9C%89%E5%87%BD%E6%95%B0-toc" style="margin-left:80px;"><a href="#%E7%AC%AC%E2%91%A0%E6%AD%A5%20%E6%89%93%E5%BC%80activations.py%E6%96%87%E4%BB%B6%EF%BC%8C%E6%9F%A5%E7%9C%8B%E5%B7%B2%E6%9C%89%E5%87%BD%E6%95%B0" rel="nofollow">第①步 打开activations.py文件，查看已有函数</a></p> 
+<p id="%E7%AC%AC%E2%91%A1%E6%AD%A5%20%E5%9C%A8common.py%E4%B8%AD%E6%9B%B4%E6%8D%A2%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%C2%A0-toc" style="margin-left:80px;"><a href="#%E7%AC%AC%E2%91%A1%E6%AD%A5%20%E5%9C%A8common.py%E4%B8%AD%E6%9B%B4%E6%8D%A2%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%C2%A0" rel="nofollow">第②步 在common.py中更换激活函数&nbsp;</a></p> 
+<p id="%F0%9F%8C%B2%E5%9B%9B%E3%80%81%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-toc" style="margin-left:0px;"><a href="#%F0%9F%8C%B2%E5%9B%9B%E3%80%81%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0" rel="nofollow">🌲四、如何选择合适的激活函数</a></p> 
+<p id="%F0%9F%8C%9F%E6%9C%AC%E4%BA%BAYOLOv5%E7%B3%BB%E5%88%97%E5%AF%BC%E8%88%AA-toc" style="margin-left:0px;"><a href="#%F0%9F%8C%9F%E6%9C%AC%E4%BA%BAYOLOv5%E7%B3%BB%E5%88%97%E5%AF%BC%E8%88%AA" rel="nofollow">🌟本人YOLOv5系列导航</a></p> 
+<p><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fc33f146aba4d74ba22a17dfd12431d32.gif"></p> 
+<h2 id="%F0%9F%8C%B2%E4%B8%80%E3%80%81%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E7%AE%80%E4%BB%8B">🌲一、激活函数的简介</h2> 
+<h3 id="%F0%9F%8C%BB1.1%20%E4%BB%80%E4%B9%88%E6%98%AF%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%EF%BC%9F"><strong>1.1 什么是激活函数？</strong></h3> 
+<p>在接触到深度学习（Deep Learning）后，特别是神经网络中，我们会发现在每一层的神经网络输出后都会使用一个函数（比如sigmoid，tanh，Relu等等）对结果进行运算，这个函数就是激活函数（Activation Function）。那么为什么需要添加激活函数呢？如果不添加又会产生什么问题呢？</p> 
+<p>首先，我们知道神经网络模拟了人类神经元的工作机理，<span style="color:#fe2c24;"><strong>激活函数（Activation Function）是一种添加到人工神经网络中的函数，旨在帮助网络学习数据中的复杂模式。</strong></span><span style="color:#1a439c;"><strong>在神经元中，输入的input经过一系列加权求和后作用于另一个函数，这个函数就是这里的激活函数</strong>。</span><span style="color:#1c7331;"><strong>激活函数是一种特殊的非线性函数，它能够在神经网络中使用，其作用是将输入信号转化成输出信号。</strong></span>类似于人类大脑中基于神经元的模型，它将神经元中的输入信号转换为一个有意义的输出，从而使得神经网络能够学习和识别复杂的模式。激活函数最终决定了是否传递信号以及要发射给下一个神经元的内容。<span style="color:#1c7892;"><strong>在人工神经网络中，一个节点的激活函数定义了该节点在给定的输入或输入集合下的输出。</strong></span></p> 
+<p>激活函数可以分为<span style="color:#ad720d;"><strong>线性激活函数</strong></span>以及<strong><span style="color:#b95514;">非线性激活函数</span>，</strong>常用的激活函数有 <strong>Sigmoid、ReLU、Leaky ReLU 和 ELU</strong> 等。</p> 
+<p class="img-center"><img alt="在这里插入图片描述" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F4eff32a218577cc627cf4e464eff111b.png"></p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB1.2%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F">1.2 激活函数有什么用？</h3> 
+<p><strong>一句话总结：</strong><span style="color:#fe2c24;">为了提高模型的表达能力。</span></p> 
+<p><span style="color:#e6b223;"><strong>激活函数能让中间输出多样化，从而能够处理更复杂的问题</strong></span>。如果不使用激活函数，那么每一层的输出都是上一层输入的线性函数，最后的输出也只是最开始输入数据的线性组合而已。<span style="color:#4da8ee;"><strong>而激活函数可以给神经元引入非线性因素，当加入到多层神经网络时，就可以让神经网络拟合任何线性函数或非线性函数，</strong></span><strong><span style="color:#9c8ec1;">从而使得网络可以适合更多的非线性问题，而不仅仅是线性问题</span></strong>。</p> 
+<p>激活函数被定义为一个几乎处处可微的函数。</p> 
+<hr> 
+<h2 id="%F0%9F%8C%B2%E4%BA%8C%E3%80%81%E4%B8%80%E4%BA%9B%E5%B8%B8%E8%A7%81%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌲二、一些常见的激活函数</h2> 
+<h3 id="%F0%9F%8C%BB2.1%20sigmoid%E5%87%BD%E6%95%B0">🌻<span style="color:#4da8ee;">2.1 sigmoid函数</span></h3> 
+<p><span style="color:#fe2c24;"><strong>sigmoid </strong></span>是使用范围最广的一类激活函数，具有<strong>指数函数</strong>形状，它在物理意义上最为接近生物神经元，是一个在生物学中常见的S型的函数，也称为S型生长曲线。此外，<strong>(0, 1) 的输出还可以被表示作概率，或用于输入的归一化</strong>，代表性的如Sigmoid交叉熵损失函数。</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong><img alt="" height="69" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F0cd4ad0d906dc93c477e94ed8b32102f.png" width="151"></p> 
+<p><strong><span style="background-color:#ffd900;">图像如下：</span></strong><img alt="" height="305" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fc05a80937c8285b73a3b0fd40f4d8d0d.png" width="795"></p> 
+<p id="sigmoid%E4%BC%98%E7%82%B9%EF%BC%9A"><strong><span style="background-color:#faa572;">sigmoid优点：</span></strong></p> 
+<p>（1） 值域在0和1之间</p> 
+<p>（2）函数具有非常好的<span style="color:#fe2c24;">对称性</span></p> 
+<p>（3）sigmoid的优点在于<span style="color:#fe2c24;">输出范围有限</span>，所以数据在传递的过程中不容易发散。当然也有相应的缺点，就是饱和的时候梯度太小</p> 
+<p>（4）<span style="color:#fe2c24;">求导容易</span></p> 
+<p><strong><span style="background-color:#a2e043;">sigmoid缺点：</span></strong></p> 
+<p>（1）容易出现梯度消失</p> 
+<p>（2）函数输出并不是zero-centered（零均值）</p> 
+<p>（3）幂运算相对来讲比较耗时</p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB2.2%20tanh%20%2F%20%E5%8F%8C%E6%9B%B2%E6%AD%A3%E5%88%87%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌻<span style="color:#98c091;">2.2 tanh / 双曲正切激活函数</span></h3> 
+<p><span style="color:#fe2c24;"><strong>tanh</strong></span>激活函数又叫作双曲正切激活函数，在sigmoid基础上做出改进，与sigmoid相比，tanh输出均值为0，能够加快网络的收敛速度。然而，tanh同样存在梯度消失现象。</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong><img alt="" height="81" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F3887e8b1a36b80091b77a6e9473fd9b8.png" width="419"></p> 
+<p><strong><span style="background-color:#ffd900;">图像如下：</span></strong></p> 
+<p style="text-align:center;"><img alt="" height="322" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fe58d7204fef7f7410e92b4bf82e91938.png" width="452"></p> 
+<p><strong><span style="background-color:#faa572;">tanh</span></strong><strong><span style="background-color:#faa572;">优点：</span></strong></p> 
+<p>（1）当输入较大或较小时，输出几乎是平滑的并且梯度较小，这不利于权重更新。<span style="color:#fe2c24;">tanh 的输出间隔为 1，并且整个函数以 0 为中心，比 sigmoid 函数更好</span></p> 
+<p>（2）在 tanh 图中，<span style="color:#fe2c24;">负输入将被强映射为负，而零输入被映射为接近零</span>。</p> 
+<p><strong><span style="background-color:#a2e043;">tanh缺点：</span></strong></p> 
+<p>（1）仍然存在梯度饱和的问题</p> 
+<p>（2）依然进行的是指数运算</p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB2.3%C2%A0ReLU%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌻<span style="color:#e6b223;"><strong>2.3&nbsp;ReLU激活函数</strong></span></h3> 
+<p><span style="color:#fe2c24;"><strong>ReLU函数</strong></span>又称为修正线性单元（Rectified Linear Unit），是一种<strong>分段线性函数</strong>，通常指代<strong>以斜坡函数及其变种为代表的非线性函数</strong>。其弥补了sigmoid函数以及tanh函数的梯度消失问题，在目前的深度神经网络中被广泛使用。</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong><img alt="" height="116" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F76f9a79ce2f903889b2cffee84d617d6.png" width="206"></p> 
+<p><strong><span style="background-color:#ffd900;">图像如下：</span></strong></p> 
+<p class="img-center"><img alt="" height="289" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F7a640919a29d8b463560d839eba4b2ce.png" width="380"></p> 
+<p><strong><span style="color:#0d0016;"><span style="background-color:#faa572;">ReLU</span></span><span style="background-color:#faa572;">优点：&nbsp;</span></strong></p> 
+<p>（1）当输入为正时，导数为1，一定程度上<span style="color:#fe2c24;">改善了梯度消失问题</span>，<span style="color:#fe2c24;">加速梯度下降的收敛速度</span></p> 
+<p>（2）<span style="color:#fe2c24;">计算速度快得多</span>。ReLU 函数中只存在线性关系，因此它的计算速度比 sigmoid 和 tanh 更快</p> 
+<p>（3）被认为具有生物学合理性（Biological Plausibility），比如单侧抑制、宽兴奋边界（即兴奋程度可以非常高）</p> 
+<p><strong><span style="background-color:#a2e043;">ReLU缺点：</span></strong></p> 
+<p>（1）当输入为负时，ReLU 完全失效，在正向传播过程中，这不是问题。有些区域很敏感，有些则不敏感。但是在反向传播过程中，如果输入负数，则梯度将完全为零</p> 
+<p>（2）不以零为中心：和 Sigmoid 激活函数类似，ReLU 函数的输出不以零为中心，ReLU 函数的输出为 0 或正数，给后一层的神经网络引入偏置偏移，会影响梯度下降的效率&nbsp;</p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB2.4%20SiLU%C2%A0">🌻<span style="color:#9c8ec1;">2.4 SiLU&nbsp;</span></h3> 
+<p><span style="color:#fe2c24;"><strong>SiLU</strong></span>激活函数（又称Sigmoid-weighted Linear Unit）是一种新型的<strong>非线性激活函数</strong>，它是Sigmoid和ReLU的改进版。SiLU具备无上界有下界、平滑、非单调的特性。SiLU在深层模型上的效果优于 ReLU。可以看做是平滑的ReLU激活函数。SiLU激活函数的特征是它在<strong>低数值区域中表现较为平滑，而在高数值区域中表现起来十分“锐利”</strong>，从而能够有效地<strong>避免过度学习</strong>的问题。</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong></p> 
+<p class="img-center"><img alt="" height="84" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fa64ae1a6f5772a0af2e491ab8019fc1f.png" width="346"></p> 
+<p><strong><span style="background-color:#ffd900;">图像如下：</span></strong></p> 
+<p class="img-center"><img alt="在这里插入图片描述" height="297" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F8e3be6f40a6e939ee22ba0f347d75708.gif" width="392"></p> 
+<p><strong><span style="background-color:#faa572;">Si</span><span style="color:#0d0016;"><span style="background-color:#faa572;">LU</span></span><span style="background-color:#faa572;">优点：</span></strong></p> 
+<p>（1）相对于ReLU函数，<span style="color:#fe2c24;">SiLU函数在接近零时具有更平滑的曲线</span>，并且由于其使用了sigmoid函数，可以<span style="color:#fe2c24;">使网络的输出范围在0和1之间</span>。</p> 
+<p><span style="background-color:#a2e043;"><strong>Si</strong><strong>LU缺点：</strong></span></p> 
+<p>（1）引入了指数函数，增加了计算量。</p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB2.5%20swish%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌻<span style="color:#79c6cd;">2.5 swish激活函数</span></h3> 
+<p><span style="color:#fe2c24;"><strong>swish </strong></span>是一个<strong>平滑的、非单调</strong>的函数，在深度网络上始终匹配或优于 ReLU，适用于各种具有挑战性的领域，如图像分类和机器翻译。通过self-gating，它只需要一个标量输入，而在多选通场景中，它需要多个双标量输入。</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong><img alt="" height="69" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F38784dfff8a52785e50cdeb7627be0d6.png" width="262"></p> 
+<p><strong><span style="background-color:#ffd900;">图像如下：</span></strong></p> 
+<p class="img-center"><img alt="" height="201" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F02c7c57fff29fa2ec2bbfa4d96c51fb4.png" width="463"></p> 
+<p><strong><span style="background-color:#faa572;">swish优点：</span></strong></p> 
+<p>（1）<span style="color:#fe2c24;">无上界</span>（避免过拟合）</p> 
+<p>（2）<span style="color:#fe2c24;">有下界</span>（产生更强的正则化效果）</p> 
+<p>（3）<span style="color:#fe2c24;">平滑</span>（处处可导 更容易训练）</p> 
+<p>（4）<span style="color:#fe2c24;">x&lt;0具有非单调性</span>（对分布有重要意义 这点也是Swish和ReLU的最大区别）</p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB2.6%C2%A0hardswish%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌻<span style="color:#1c7331;">2.6&nbsp;hardswish激活函数</span></h3> 
+<p><span style="color:#fe2c24;"><strong>hardswish</strong></span>激活函数是<strong>对swish激活函数的改进</strong>，尽管swish非线性激活函数提高了检测精度，但不适合在嵌入式移动设备上使用，因为“S”型函数在嵌入式移动设备上的计算成本更高，求导较为复杂，在量化时计算较慢。但是如果在实验中使用hardswish非线性激活函数在准确性没差别的情况下部署在嵌入式移动设备上却会具有多重优势。</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong><img alt="" height="93" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F4d7c8e3117f01fe4a765e9fc556b4293.png" width="382"></p> 
+<p><strong><span style="background-color:#ffd900;">图像如下：</span></strong></p> 
+<p class="img-center"><img alt="" height="342" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F07fe00cb49bf8aa68b53c1071ff93bdb.png%23pic_center" width="444"></p> 
+<p><span style="color:#0d0016;"><span style="background-color:#faa572;">&nbsp;</span></span><strong><span style="background-color:#faa572;"><span style="color:#0d0016;">hardswish</span>优点：</span></strong></p> 
+<p>（1）hardswish相较于swish函数，具有<span style="color:#fe2c24;">数值稳定性好</span>，<span style="color:#fe2c24;">计算速度快</span>等优点</p> 
+<p>（2）消除了由于近似Sigmoid形的不同实现而导致的潜在数值精度损失</p> 
+<p>（3）在实践中，hardswish激活函数可以实现为<span style="color:#fe2c24;">分段功能</span>，以<span style="color:#fe2c24;">减少内存访问次数</span>，从而大大降低了等待时间成本</p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB2.7%C2%A0Mish%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌻<span style="color:#b95514;">2.7&nbsp;Mish激活函数</span></h3> 
+<p><span style="color:#fe2c24;"><strong>Mish</strong></span>一种<strong>新型的自正则化的非单调</strong>激活函数，拥有无上界(unbounded above)、有下界(bounded below)、平滑(smooth)和非单调(nonmonotonic)四个优点。其在ImageNet上的效果比ReLU和Swish都要好。</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong><img alt="" height="88" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F160a28094f106d52d3d97e59972da3ea.png" width="347"></p> 
+<p><strong><span style="background-color:#ffd900;">图像如下：</span></strong></p> 
+<p class="img-center"><img alt="" height="371" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fff0969f1f5c111aea6ffbd74b49b4a62.png" width="493"></p> 
+<p><span style="color:#0d0016;"><span style="background-color:#faa572;">&nbsp;<strong>Mish</strong></span></span><strong><span style="background-color:#faa572;">优点：</span></strong></p> 
+<p>（1）没有上限</p> 
+<p>（2）有下限</p> 
+<p>（3）非单调性</p> 
+<p>（4）无穷阶连续性和光滑性</p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB2.8%C2%A0ELU%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌻<span style="color:#ad720d;">2.8&nbsp;ELU激活函数</span></h3> 
+<p><span style="color:#fe2c24;"><strong>ELU</strong></span><span style="color:#0d0016;">（Exponential Linear Unit）激活函数是<strong>一种添加了指数项的非线性激活函数</strong>，ELU 激活函数的特征<strong>在于输入为负时会有正值的输出</strong>，<strong>而不是 0</strong>。这样可以有效地避免神经元死亡问题。 ELU 激活函数有助于神经元学习复杂的非线性函数，可以帮助神经元学习复杂的非线性特征。</span><br> &nbsp;</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong><img alt="" height="139" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fd05dc88f0acb2785416d01d94ca9b673.png" width="506"></p> 
+<p><strong><span style="background-color:#ffd900;">图像如下：</span></strong>&nbsp;</p> 
+<p class="img-center"><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fdb9da4114256737ea93e41b65d9e9b91.png"></p> 
+<p><span style="color:#0d0016;"><span style="background-color:#faa572;">&nbsp;<strong>ELU</strong></span></span><strong><span style="background-color:#faa572;">优点：</span></strong>&nbsp;</p> 
+<p>（1）<span style="color:#fe2c24;">不会有Dead ReLU问题</span></p> 
+<p>（2）<span style="color:#fe2c24;">输出的均值接近0</span>。 能得到负值输出，这能帮助网络向正确的方向推动权重和偏置变化</p> 
+<p><span style="background-color:#a2e043;"><strong>ELU缺点：</strong></span></p> 
+<p>（1）由于包含指数运算，所以计算量稍大</p> 
+<p>（2）无法避免梯度爆炸问题</p> 
+<p>（3）神经网络不学习 α 值</p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB2.9%C2%A0AconC%2FMetaAconC%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌻2<span style="color:#511b78;">.9&nbsp;AconC/MetaAconC激活函数</span></h3> 
+<p>这是2021年新出的一个激活函数，先从ReLU函数出发，采用Smoth maximum近似平滑公式证明了Swish就是ReLU函数的近似平滑表示，这也算提出一种新颖的Swish函数解释（Swish不再是一个黑盒）。之后进一步分析ReLU的一般形式Maxout系列激活函数，再次利用Smoth maximum将Maxout系列扩展得到简单且有效的ACON系列激活函数：ACON-A、ACON-B、ACON-C。最终提出meta-ACON，动态的学习（自适应）激活函数的线性/非线性，显著提高了表现。</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong><br><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F27aebeaf3c3431cc93a468ba18526bb6.png%23pic_center"></p> 
+<p>&nbsp;<strong><span style="background-color:#ffd900;">图像如下：</span></strong>&nbsp;</p> 
+<p><img alt="在这里插入图片描述" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F2a2c3fe5ab50ea3e55d9df00d826fbb7.png%23pic_center"></p> 
+<p>&nbsp;<span style="color:#0d0016;"><span style="background-color:#faa572;">&nbsp;</span><strong><span style="background-color:#faa572;">AconC/MetaAconC</span></strong></span><strong><span style="background-color:#faa572;">优点：</span></strong>&nbsp;</p> 
+<p>（1）动态的学习（自适应）激活函数的线性/非线性，显著提高了表现</p> 
+<p>（2）ACON的参数P1和P2负责控制函数的上下限，也就是允许神经元自适应激活或者不激活，这个动态控制函数线性与非线性能力的参数就可以进行一个自适应学习</p> 
+<hr> 
+<h3 id="%F0%9F%8C%BB2.10%C2%A0Softplus%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌻<span style="color:#1a439c;">2.10&nbsp;Softplus激活函数</span></h3> 
+<p><span style="color:#fe2c24;"><strong>Softplus</strong></span>函数可以看作是<strong>ReLU函数的平滑</strong>。根据神经科学家的相关研究，Softplus函数和ReLU函数与脑神经元激活频率函数有神似的地方。也就是说，相比于早期的激活函数，Softplus函数和ReLU函数更加接近脑神经元的激活模型，而神经网络正是基于脑神经科学发展而来，这两个激活函数的应用促成了神经网络研究的新浪潮。</p> 
+<p><strong><span style="background-color:#38d8f0;">函数的表达式如下：</span></strong><img alt="" height="89" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fa6cf6c24e3e1ebed210b6d35d2cd08d2.png" width="359"></p> 
+<p><strong><span style="background-color:#ffd900;">图像如下：</span></strong></p> 
+<p class="img-center"><img alt="" height="329" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F913c7ba025d14e6ee0456ed575d6958c.png" width="442"></p> 
+<p><strong><span style="color:#0d0016;"><span style="background-color:#faa572;">Softplus</span></span><span style="background-color:#faa572;">优点：</span></strong>&nbsp;</p> 
+<p>（1）对于有些输出，需要更加平滑和连续性，而&nbsp;Softplus相对于Relu，是一种更加平滑的激活函数</p> 
+<p><strong><span style="color:#0d0016;"><span style="background-color:#a2e043;">Softplus</span></span></strong><span style="background-color:#a2e043;"><strong>缺点：</strong></span></p> 
+<p>（1）计算复杂，涉及到e的指数计算，计算量大</p> 
+<p>（2）这个函数对于硬件化也不友好</p> 
+<hr> 
+<h2 id="%F0%9F%8C%B2%E4%B8%89%E3%80%81%E6%9B%B4%E6%8D%A2%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E6%AD%A5%E9%AA%A4">🌲三、更换激活函数的步骤</h2> 
+<h4 id="%E7%AC%AC%E2%91%A0%E6%AD%A5%20%E6%89%93%E5%BC%80activations.py%E6%96%87%E4%BB%B6%EF%BC%8C%E6%9F%A5%E7%9C%8B%E5%B7%B2%E6%9C%89%E5%87%BD%E6%95%B0"><span style="background-color:#38d8f0;">第①步 打开activations.py文件，查看已有函数</span></h4> 
+<p>首先我们找到<strong><span style="color:#1c7331;">utils/activations.py</span></strong>文件，位置如下图所示：</p> 
+<p class="img-center"><img alt="" height="374" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F85fceb8d01b5e0621d0672af42338ebd.png" width="238"></p> 
+<p>打开这个文件，我们可以发现，<strong><span style="background-color:#fef2f0;">SiLU，Hardswish，Mish，MemoryEfficientMish，FReLU，AconC，MetaAconC&nbsp;&nbsp;</span></strong>已经在文件里定义了，这是我们可以直接用的。</p> 
+<p class="img-center"><img alt="" height="510" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F4d26a48523b5325de84e54fcb2e63c36.png" width="487"></p> 
+<hr> 
+<h4 id="%E7%AC%AC%E2%91%A1%E6%AD%A5%20%E5%9C%A8common.py%E4%B8%AD%E6%9B%B4%E6%8D%A2%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%C2%A0"><strong><span style="background-color:#a2e043;">第②步 在common.py中更换激活函数&nbsp;</span></strong></h4> 
+<p>先导入要更换的函数，这里以<strong>MetaAconC</strong>为例：</p> 
+<pre><code class="language-python">from utils.activations import MetaAconC</code></pre> 
+<p>然后再在相应位置修改，如下图所示：</p> 
+<p><img alt="" height="903" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fc9f2c1b365d782698fc3162079afd58d.png" width="1200"></p> 
+<p>如果想更换其他激活函数，也可以参照下面代码，步骤都是一样的：</p> 
+<pre><code class="language-python">class Conv(nn.Module):
+    # Standard convolution
+    def __init__(self, c1, c2, k=1, s=1, p=None, g=1, act=True):  # ch_in, ch_out, kernel, stride, padding, groups
+        super().__init__()
+        self.conv = nn.Conv2d(c1, c2, k, s, autopad(k, p), groups=g, bias=False)
+        self.bn = nn.BatchNorm2d(c2)
+        #self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = nn.Identity() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = nn.Tanh() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = nn.Sigmoid() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = nn.ReLU() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = nn.LeakyReLU(0.1) if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = nn.Hardswish() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = Mish() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = FReLU(c2) if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = AconC(c2) if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        self.act = MetaAconC(c2) if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = SiLU_beta(c2) if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        #self.act = FReLU_noBN_biasFalse(c2) if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+        # self.act = FReLU_noBN_biasTrue(c2) if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+    def forward(self, x):
+        return self.act(self.bn(self.conv(x)))
+ 
+    def forward_fuse(self, x):
+        return self.act(self.conv(x))
+ </code></pre> 
+<hr> 
+<h2 id="%F0%9F%8C%B2%E5%9B%9B%E3%80%81%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">🌲四、如何选择合适的激活函数</h2> 
+<p>其实关于激活函数的选择是调参中的玄学，不同的数据集效果不同，以下是我参考一些资料总结的一点经验，也欢迎大家在评论区补充噢！</p> 
+<blockquote> 
+ <ol><li>小白可以从ReLU函数开始，如果ReLU函数没有提供最优结果，再尝试其他激活函数。</li><li>如果使用 ReLU，那么一定要小心设置 learning rate，而且要注意不要让网络出现很多 dead神经元，如果出现这个问题，那么可以试试 Leaky ReLU、PReLU 或者 Maxout（貌似PReLU效果最好）。</li><li>ReLU函数只能在隐藏层中使用。</li><li>在搭建神经网络时，如果搭建的神经网络层数不多，选择&nbsp;Sigmoid、Tanh、ReLU，LeakyReLU，Softmax&nbsp;都可以；而如果搭建的网络层次较多，那就需要小心，选择不当就可导致梯度消失问题。</li><li>由于梯度消失问题，有时要避免使用sigmoid和tanh函数。</li><li>用于分类器时，Sigmoid函数及其组合通常效果更好。（除非在二分类问题中，否则请小心使用Sigmoid函数）</li></ol> 
+</blockquote> 
+<hr> 
+<blockquote> 
+ <p><strong>本文参考：</strong></p> 
+ <p><a href="https://zhuanlan.zhihu.com/p/364620596" rel="nofollow" title="深度学习笔记：如何理解激活函数？（附常用激活函数） - 知乎 (zhihu.com)">深度学习笔记：如何理解激活函数？（附常用激活函数） - 知乎 (zhihu.com)</a></p> 
+ <p><a href="https://blog.csdn.net/weixin_43694096/article/details/124413941?spm=1001.2014.3001.5502" title="YOLOv5/v7 更换激活函数_yolov5修改激活函数_迪菲赫尔曼的博客-CSDN博客">YOLOv5/v7 更换激活函数_yolov5修改激活函数_迪菲赫尔曼的博客-CSDN博客</a></p> 
+</blockquote> 
+<h2 id="%F0%9F%8C%9F%E6%9C%AC%E4%BA%BAYOLOv5%E7%B3%BB%E5%88%97%E5%AF%BC%E8%88%AA">🌟本人YOLOv5系列导航</h2> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="69" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="69">​&nbsp; &nbsp;🍀<strong><strong><strong><strong><a href="https://so.csdn.net/so/search?q=YOLOv5%E6%BA%90%E7%A0%81&amp;spm=1001.2101.3001.7020" title="YOLOv5源码">YOLOv5源码</a></strong></strong></strong>详解系列：</strong>&nbsp;&nbsp;</p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129356033?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（1）——项目目录结构解析">YOLOv5源码逐行超详细注释与解读（1）——项目目录结构解析</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129349094?spm=1001.2014.3001.5501" title="​​​​​​YOLOv5源码逐行超详细注释与解读（2）——推理部分detect.py">​​​​​​YOLOv5源码逐行超详细注释与解读（2）——推理部分detect.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129460666?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（3）——训练部分train.py">YOLOv5源码逐行超详细注释与解读（3）——训练部分train.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129649553?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（4）——验证部分val（test）.py">YOLOv5源码逐行超详细注释与解读（4）——验证部分val（test）.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129697521?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（5）——配置文件yolov5s.yaml">YOLOv5源码逐行超详细注释与解读（5）——配置文件yolov5s.yaml</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129803802?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（6）——网络结构（1）yolo.py">YOLOv5源码逐行超详细注释与解读（6）——网络结构（1）yolo.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129854764?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（7）——网络结构（2）common.py">YOLOv5源码逐行超详细注释与解读（7）——网络结构（2）common.py</a></p> 
+<hr> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="69" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="69">​​&nbsp; &nbsp;🍀<strong><strong><strong><strong><strong><strong><strong><strong><a href="https://so.csdn.net/so/search?q=YOLOv5%E6%BA%90%E7%A0%81&amp;spm=1001.2101.3001.7020" title="YOLOv5入门实践">YOLOv5入门实践</a></strong></strong></strong></strong></strong></strong></strong>系列：</strong>&nbsp;&nbsp;</p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129981848?spm=1001.2014.3001.5501" title="YOLOv5入门实践（1）——手把手带你环境配置搭建">YOLOv5入门实践（1）——手把手带你环境配置搭建</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129995604?spm=1001.2014.3001.5501" title="YOLOv5入门实践（2）——手把手教你利用labelimg标注数据集">YOLOv5入门实践（2）——手把手教你利用labelimg标注数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130025866?spm=1001.2014.3001.5501" title="YOLOv5入门实践（3）——手把手教你划分自己的数据集">YOLOv5入门实践（3）——手把手教你划分自己的数据集</a></p> 
+<p>&nbsp;<a href="https://blog.csdn.net/weixin_43334693/article/details/130043351?spm=1001.2014.3001.5501" title="YOLOv5入门实践（4）——手把手教你训练自己的数据集">YOLOv5入门实践（4）——手把手教你训练自己的数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130044342?spm=1001.2014.3001.5501" title="YOLOv5入门实践（5）——从零开始，手把手教你训练自己的目标检测模型（包含pyqt5界面）">YOLOv5入门实践（5）——从零开始，手把手教你训练自己的目标检测模型（包含pyqt5界面）</a></p> 
+<p style="text-align:center;"><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F9399627be98e63e912c64c82bd1ccf13.gif"></p>
+                
+              </div>
+              </div>
+          </div>
+      </body>
+      </html>

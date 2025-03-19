@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+      <html lang="zh-CN">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-2fe393ff58.min.css">
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-704d5b9767.css">
+        <style>
+          body {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+          }
+          img {
+            max-width: 100%;
+            height: auto;
+          }
+          pre {
+            background-color: #e4dfdf;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+          }
+          code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+          }
+          blockquote {
+            background: #f9f9f9;
+            border-left: 10px solid #ccc;
+            margin: 1.5em 10px;
+            padding: 0.5em 10px;
+          }
+          table {
+            border-collapse: collapse;
+            width: 100%;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+          }
+          th {
+            background-color: #f2f2f2;
+          }
+        </style>
+      </head>
+      <body>
+          <div class="blog-content-box">
+            <div id="article_content" class="article_content clearfix">
+              <div id="content_views" class="htmledit_views">
+                
+                
+    <div class="article-header-box">
+        <div class="article-header">
+            <div class="article-title-box">
+                <h1 class="title-article" id="articleContentId">YOLOv5改进系列（0）——重要性能指标、训练结果评价及分析、影响mAP指标的因素、优化mAP的方法</h1>
+            </div>
+            <div class="article-info-box">
+                <div class="article-bar-top">
+                    <img class="article-type-img" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Foriginal.png" alt="">
+                    <div class="bar-content">
+                      <a class="follow-nickName vip-name" href="https://jrs0511.blog.csdn.net" target="_blank" rel="noopener" title="路人贾'ω'">路人贾'ω'</a>
+                    <img class="article-time-img article-heard-img" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnewUpTime2.png" alt="">
+                    <span class="time">已于&nbsp;2024-01-18 15:41:23&nbsp;修改</span>
+                   <div class="read-count-box">
+                      <img class="article-read-img article-heard-img" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FarticleReadEyes2.png" alt="">
+                      <span class="read-count">阅读量3.2w</span>
+                      <a id="blog_detail_zk_collection" class="un-collection" data-report-click="{&quot;mod&quot;:&quot;popu_823&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4232&quot;,&quot;ab&quot;:&quot;new&quot;}">
+                          <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FtobarCollect2.png" alt="">
+                          <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FtobarCollectionActive2.png" alt="">
+                          <span class="name">收藏</span>
+                          <span class="get-collection">
+                              978
+                          </span>
+                      </a>
+                      <div class="read-count-box is-like">
+                        <img class="article-read-img article-heard-img" style="display:none" id="is-like-imgactive-new" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnewHeart2023Active.png" alt="">
+                        <img class="article-read-img article-heard-img" style="display:block" id="is-like-img-new" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FnewHeart2023Black.png" alt="">
+                        <span class="read-count" id="blog-digg-num">点赞数
+                            133
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="blog-tags-box">
+                    <div class="tags-box artic-tag-box">
+                            <span class="label">分类专栏：</span>
+                                <a class="tag-link" href="https://blog.csdn.net/weixin_43334693/category_12233704.html" target="_blank" rel="noopener">YOLOv5入门＋实践＋改进</a>
+                            <span class="label">文章标签：</span>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;YOLO&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;YOLO\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;YOLO&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;YOLO\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=YOLO&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">YOLO</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;深度学习&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;深度学习\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;深度学习&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;深度学习\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">深度学习</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;目标检测&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;目标检测\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;目标检测&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;目标检测\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">目标检测</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;人工智能&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;人工智能\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;人工智能&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;人工智能\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">人工智能</a>
+                                <a rel="nofollow" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;计算机视觉&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;计算机视觉\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;计算机视觉&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;计算机视觉\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">计算机视觉</a>
+                    </div>
+                </div>
+                <div class="up-time"><span>于&nbsp;2023-05-08 22:18:50&nbsp;首次发布</span></div>
+                <div class="slide-content-box">
+                    <div class="article-copyright">
+                        <div class="creativecommons">
+                            版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 BY-SA </a>版权协议，转载请附上原文出处链接和本声明。
+                        </div>
+                        <div class="article-source-link">
+                            本文链接：<a href="https://blog.csdn.net/weixin_43334693/article/details/130564848" target="_blank">https://blog.csdn.net/weixin_43334693/article/details/130564848</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="operating">
+                    <a class="href-article-edit slide-toggle">版权</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="blogHuaweiyunAdvert"></div>
+        <div id="blogColumnPayAdvert">
+            <div class="column-group">
+                <div class="column-group-item column-group0 column-group-item-one">
+                    <div class="item-l">
+                        <a class="item-target" href="https://blog.csdn.net/weixin_43334693/category_12233704.html" target="_blank" title="YOLOv5入门＋实践＋改进" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.6332&quot;}">
+                            <img class="item-target" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fimg-blog.csdnimg.cn%2F0c61c23a5a1448488da55b6e4e1d5d58.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_224%2Cw_224" alt="">
+                            <span class="title item-target">
+                                <span>
+                                <span class="tit">YOLOv5入门＋实践＋改进</span>
+                                    <span class="dec">专栏收录该内容</span>
+                                </span>
+                                <span class="rank"><img src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FcolumnHotIcon2.png" alt="">该专栏为热销专栏榜&nbsp;第69名</span>
+                            </span>
+                        </a>
+                    </div>
+                    <div class="item-m">
+                        <span>47 篇文章</span>
+                        <span>1055 订阅</span>
+                        <span class="old-add-new-box">
+                            <span class="price">¥99.90</span>
+                            <span class="oldprice">¥299.90</span>
+                        </span>
+                    </div>
+                    <div class="item-r">
+                                        <a class="item-target article-column-bt articleColumnBt" data-id="12233704" data-price="99.90" data-sum="47" data-people="1055" data-hotrank="69" data-oldprice="299.90" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.6333&quot;}" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.6333&quot;}">订阅专栏</a>
+                                        <a class="item-target column-studyvip-free column-studyvip-pass" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.8589&quot;}" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.8589&quot;}">
+                                            <img class="item-target column-studyvip-icon" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fcomponents%2Fimg%2FstudyVipIcon.png">超级会员免费看
+                                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+      <div class="ai-abstract-box">
+         <div class="ai-abstract">
+          <div class="abstract-content">
+            <img class="lock-img" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fimg-home.csdnimg.cn%2Fimages%2F20240711042549.png" alt="">
+            本文详细介绍了YOLOv5目标检测模型的性能指标，包括混淆矩阵、准确率、精确率、召回率、PR曲线、AP、mAP等。还探讨了训练结果的分析，如权重文件、混淆矩阵图像、F1曲线、可视化文件等，并讨论了影响mAP的因素以及优化mAP的方法。
+          </div>
+          <span>摘要由CSDN通过智能技术生成</span>
+        </div>
+      </div>
+    <article class="baidu_pl">
+        <div id="article_content" class="article_content clearfix">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-704d5b9767.css">
+             
+                <div id="content_views" class="htmledit_views">
+                    <h4 id="%F0%9F%8C%9F%E6%9C%AC%E4%BA%BAYOLOv5%E7%B3%BB%E5%88%97%E5%AF%BC%E8%88%AA"><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fc9617857841c5035a90aa623b72764ad.gif"></h4> 
+<p><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fdbc82e72e6c775580c70748a6c416ba9.png"></p> 
+<h2 id="%E5%89%8D%E8%A8%80">前言</h2> 
+<p>最近我在研究YOLOv5的改进，一个模型的好坏、改进后效果如何都是需要一系列指标来判断的。这篇就是我将这几天学到的内容做一下总结。</p> 
+<p><span style="color:#fe2c24;"><strong>友情提醒：</strong></span><span style="color:#0d0016;">本篇</span>干货较多，建议先<img alt="" height="68" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fb64fee696c9a1d11c1818db1cf19559f.gif" width="68">再慢慢看噢！</p> 
+<p style="text-align:center;">&nbsp;<img alt="" height="224" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F25b6ecbf3ba885c29cf9cf4a39756871.gif" width="224"></p> 
+<p><img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="69" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="69">​&nbsp; &nbsp;🍀<strong>本人<strong><strong><strong><a href="https://so.csdn.net/so/search?q=YOLOv5%E6%BA%90%E7%A0%81&amp;spm=1001.2101.3001.7020" title="YOLOv5源码">YOLOv5源码</a></strong></strong></strong>详解系列：</strong>&nbsp;&nbsp;</p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129356033?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（1）——项目目录结构解析">YOLOv5源码逐行超详细注释与解读（1）——项目目录结构解析</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129349094?spm=1001.2014.3001.5501" title="​​​​​​YOLOv5源码逐行超详细注释与解读（2）——推理部分detect.py">​​​​​​YOLOv5源码逐行超详细注释与解读（2）——推理部分detect.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129460666?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（3）——训练部分train.py">YOLOv5源码逐行超详细注释与解读（3）——训练部分train.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129649553?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（4）——验证部分val（test）.py">YOLOv5源码逐行超详细注释与解读（4）——验证部分val（test）.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129697521?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（5）——配置文件yolov5s.yaml">YOLOv5源码逐行超详细注释与解读（5）——配置文件yolov5s.yaml</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129803802?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（6）——网络结构（1）yolo.py">YOLOv5源码逐行超详细注释与解读（6）——网络结构（1）yolo.py</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129854764?spm=1001.2014.3001.5501" title="YOLOv5源码逐行超详细注释与解读（7）——网络结构（2）common.py">YOLOv5源码逐行超详细注释与解读（7）——网络结构（2）common.py</a></p> 
+<hr> 
+<p>&nbsp;&nbsp;<img alt="962f7cb1b48f44e29d9beb1d499d0530.gif" height="69" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fac3c5d6bfbcbf982e8e9e3632d7f20d1.gif" width="69">​&nbsp; &nbsp;🍀<strong>本人<strong><strong><strong><strong><strong><strong><strong><a href="https://so.csdn.net/so/search?q=YOLOv5%E6%BA%90%E7%A0%81&amp;spm=1001.2101.3001.7020" title="YOLOv5入门实践">YOLOv5入门实践</a></strong></strong></strong></strong></strong></strong></strong>系列：</strong>&nbsp;&nbsp;</p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129981848?spm=1001.2014.3001.5501" title="YOLOv5入门实践（1）——手把手带你环境配置搭建">YOLOv5入门实践（1）——手把手带你环境配置搭建</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/129995604?spm=1001.2014.3001.5501" title="YOLOv5入门实践（2）——手把手教你利用labelimg标注数据集">YOLOv5入门实践（2）——手把手教你利用labelimg标注数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130025866?spm=1001.2014.3001.5501" title="YOLOv5入门实践（3）——手把手教你划分自己的数据集">YOLOv5入门实践（3）——手把手教你划分自己的数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130043351?spm=1001.2014.3001.5501" title="YOLOv5入门实践（4）——手把手教你训练自己的数据集">YOLOv5入门实践（4）——手把手教你训练自己的数据集</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130044342?spm=1001.2014.3001.5501" title="YOLOv5入门实践（5）——从零开始，手把手教你训练自己的目标检测模型（包含pyqt5界面）">YOLOv5入门实践（5）——从零开始，手把手教你训练自己的目标检测模型（包含pyqt5界面）</a></p> 
+<hr> 
+<p>&nbsp;<img alt="" height="49" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F9d66c6b496add6f9fddd9ce463aca2e1.gif" width="49">🌟<strong>本人YOLOv5改进系列：</strong>&nbsp;</p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130564848?spm=1001.2014.3001.5501" title="YOLOv5改进系列（0）——重要性能指标与训练结果评价及分析">YOLOv5改进系列（0）——重要性能指标与训练结果评价及分析</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130551913?spm=1001.2014.3001.5501" title="YOLOv5改进系列（1）——添加SE注意力机制">YOLOv5改进系列（1）——添加SE注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130587102?spm=1001.2014.3001.5501" title="YOLOv5改进系列（2）——添加CBAM注意力机制">YOLOv5改进系列（2）——添加CBAM注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130619604?spm=1001.2014.3001.5501" title="YOLOv5改进系列（3）——添加CA注意力机制">YOLOv5改进系列（3）——添加CA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130641318?spm=1001.2014.3001.5501" title="YOLOv5改进系列（4）——添加ECA注意力机制">YOLOv5改进系列（4）——添加ECA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/130832933?spm=1001.2014.3001.5501" title="YOLOv5改进系列（5）——替换主干网络之 MobileNetV3">YOLOv5改进系列（5）——替换主干网络之 MobileNetV3</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131008642?spm=1001.2014.3001.5501" title="YOLOv5改进系列（6）——替换主干网络之 ShuffleNetV2">YOLOv5改进系列（6）——替换主干网络之 ShuffleNetV2</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131031541?spm=1001.2014.3001.5501" title="YOLOv5改进系列（7）——添加SimAM注意力机制">YOLOv5改进系列（7）——添加SimAM注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131053284?spm=1001.2014.3001.5501" title="YOLOv5改进系列（8）——添加SOCA注意力机制">YOLOv5改进系列（8）——添加SOCA注意力机制</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131207097?csdn_share_tail=%7B%22type%22%3A%22blog%22%2C%22rType%22%3A%22article%22%2C%22rId%22%3A%22131207097%22%2C%22source%22%3A%22weixin_43334693%22%7D" title="YOLOv5改进系列（9）——替换主干网络之EfficientNetv2">YOLOv5改进系列（9）——替换主干网络之EfficientNetv2</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131235113?spm=1001.2014.3001.5501" title="​​​​​​YOLOv5改进系列（10）——替换主干网络之GhostNet">​​​​​​YOLOv5改进系列（10）——替换主干网络之GhostNet</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131350224?spm=1001.2014.3001.5501" title="YOLOv5改进系列（11）——添加损失函数之EIoU、AlphaIoU、SIoU、WIoU">YOLOv5改进系列（11）——添加损失函数之EIoU、AlphaIoU、SIoU、WIoU</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131461294?spm=1001.2014.3001.5501" title="YOLOv5改进系列（12）——更换Neck之BiFPN">YOLOv5改进系列（12）——更换Neck之BiFPN</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131513850?spm=1001.2014.3001.5501" title="YOLOv5改进系列（13）——更换激活函数之SiLU，ReLU，ELU，Hardswish，Mish，Softplus，AconC系列等">YOLOv5改进系列（13）——更换激活函数之SiLU，ReLU，ELU，Hardswish，Mish，Softplus，AconC系列等</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131552028?spm=1001.2014.3001.5501" title="YOLOv5改进系列（14）——更换NMS（非极大抑制）之 DIoU-NMS、CIoU-NMS、EIoU-NMS、GIoU-NMS 、SIoU-NMS、Soft-NMS">YOLOv5改进系列（14）——更换NMS（非极大抑制）之 DIoU-NMS、CIoU-NMS、EIoU-NMS、GIoU-NMS 、SIoU-NMS、Soft-NMS</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131613721?spm=1001.2014.3001.5501" title="YOLOv5改进系列（15）——增加小目标检测层">YOLOv5改进系列（15）——增加小目标检测层</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/131973273?spm=1001.2014.3001.5501" title="YOLOv5改进系列（16）——添加EMA注意力机制（ICASSP2023|实测涨点）">YOLOv5改进系列（16）——添加EMA注意力机制（ICASSP2023|实测涨点）</a>&nbsp;<a href="https://blog.csdn.net/weixin_43334693/article/details/131999141?spm=1001.2014.3001.5501" title="YOLOv5改进系列（17）——更换IoU之MPDIoU（ELSEVIER 2023|超越WIoU、EIoU等|实测涨点）">YOLOv5改进系列（17）——更换IoU之MPDIoU（ELSEVIER 2023|超越WIoU、EIoU等|实测涨点）</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/132070079?spm=1001.2014.3001.5501" title="YOLOv5改进系列（18）——更换Neck之AFPN（全新渐进特征金字塔|超越PAFPN|实测涨点）">YOLOv5改进系列（18）——更换Neck之AFPN（全新渐进特征金字塔|超越PAFPN|实测涨点）</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/132161488?spm=1001.2014.3001.5501" title="YOLOv5改进系列（19）——替换主干网络之Swin TransformerV1（参数量更小的ViT模型）">YOLOv5改进系列（19）——替换主干网络之Swin TransformerV1（参数量更小的ViT模型）</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/132203200?spm=1001.2014.3001.5501" title="YOLOv5改进系列（20）——添加BiFormer注意力机制（CVPR2023|小目标涨点神器）">YOLOv5改进系列（20）——添加BiFormer注意力机制（CVPR2023|小目标涨点神器）</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/132211831?spm=1001.2014.3001.5501" title="YOLOv5改进系列（21）——替换主干网络之RepViT（清华 ICCV 2023|最新开源移动端ViT）">YOLOv5改进系列（21）——替换主干网络之RepViT（清华 ICCV 2023|最新开源移动端ViT）</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/132367429" title="YOLOv5改进系列（22）——替换主干网络之MobileViTv1（一种轻量级的、通用的移动设备 ViT）">YOLOv5改进系列（22）——替换主干网络之MobileViTv1（一种轻量级的、通用的移动设备 ViT）</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/132428203?spm=1001.2014.3001.5502" title="YOLOv5改进系列（23）——替换主干网络之MobileViTv2（移动视觉 Transformer 的高效可分离自注意力机制）">YOLOv5改进系列（23）——替换主干网络之MobileViTv2（移动视觉 Transformer 的高效可分离自注意力机制）</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/133199471?spm=1001.2014.3001.5502" title="YOLOv5改进系列（24）——替换主干网络之MobileViTv3（移动端轻量化网络的进一步升级）">YOLOv5改进系列（24）——替换主干网络之MobileViTv3（移动端轻量化网络的进一步升级）</a></p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/135510571?spm=1001.2014.3001.5502" title="YOLOv5改进系列（25）——添加LSKNet注意力机制（大选择性卷积核的领域首次探索）">YOLOv5改进系列（25）——添加LSKNet注意力机制（大选择性卷积核的领域首次探索）</a>&nbsp;</p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/135562865?spm=1001.2014.3001.5502" title="YOLOv5改进系列（26）——添加RFAConv注意力卷积（感受野注意力卷积运算）">YOLOv5改进系列（26）——添加RFAConv注意力卷积（感受野注意力卷积运算）</a>&nbsp;</p> 
+<p><a href="https://blog.csdn.net/weixin_43334693/article/details/135610505?spm=1001.2014.3001.5502" title="YOLOv5改进系列（27）——添加SCConv注意力卷积（CVPR 2023|即插即用的高效卷积模块）">YOLOv5改进系列（27）——添加SCConv注意力卷积（CVPR 2023|即插即用的高效卷积模块）</a>&nbsp;</p> 
+<p>持续更新中。。。</p> 
+<p style="text-align:center;"><img alt="" height="80" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F5d7381bfd6a023cb0c672cff1b56cd48.gif" width="256"></p> 
+<p id="main-toc"><strong>目录</strong></p> 
+<p style="margin-left:0px;"><a href="#%E5%89%8D%E8%A8%80" rel="nofollow">前言</a></p> 
+<p id="%F0%9F%8C%9F%E4%B8%80%E3%80%81%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87-toc" style="margin-left:0px;"><a href="#%F0%9F%8C%9F%E4%B8%80%E3%80%81%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87" rel="nofollow">🌟一、性能指标</a></p> 
+<p id="1.1%20%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5-toc" style="margin-left:40px;"><a href="#1.1%20%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5" rel="nofollow">1.1 混淆矩阵</a></p> 
+<p id="1.2%C2%A0%20Accuracy%20%EF%BC%9A%E5%87%86%E7%A1%AE%E7%8E%87%EF%BC%88%E6%AD%A3%E7%A1%AE%E7%8E%87%EF%BC%89-toc" style="margin-left:40px;"><a href="#1.2%C2%A0%20Accuracy%20%EF%BC%9A%E5%87%86%E7%A1%AE%E7%8E%87%EF%BC%88%E6%AD%A3%E7%A1%AE%E7%8E%87%EF%BC%89" rel="nofollow">1.2&nbsp; Accuracy ：准确率（正确率）</a></p> 
+<p id="1.3%C2%A0Precision%20%EF%BC%9A%E7%B2%BE%E7%A1%AE%E7%8E%87%EF%BC%88%E6%9F%A5%E5%87%86%E7%8E%87%EF%BC%89-toc" style="margin-left:40px;"><a href="#1.3%C2%A0Precision%20%EF%BC%9A%E7%B2%BE%E7%A1%AE%E7%8E%87%EF%BC%88%E6%9F%A5%E5%87%86%E7%8E%87%EF%BC%89" rel="nofollow">1.3&nbsp;Precision ：精确率（查准率）</a></p> 
+<p id="1.4%20Recall%20%EF%BC%9A%E5%8F%AC%E5%9B%9E%E7%8E%87%EF%BC%88%E6%9F%A5%E5%85%A8%E7%8E%87%EF%BC%89-toc" style="margin-left:40px;"><a href="#1.4%20Recall%20%EF%BC%9A%E5%8F%AC%E5%9B%9E%E7%8E%87%EF%BC%88%E6%9F%A5%E5%85%A8%E7%8E%87%EF%BC%89" rel="nofollow">1.4 Recall ：召回率（查全率）</a></p> 
+<p id="1.5%C2%A0PR%E6%9B%B2%E7%BA%BF-toc" style="margin-left:40px;"><a href="#1.5%C2%A0PR%E6%9B%B2%E7%BA%BF" rel="nofollow">1.5&nbsp;PR曲线</a></p> 
+<p id="1.6%20AP%20%EF%BC%88Average%20Precision%EF%BC%89%EF%BC%9A%20%E5%B9%B3%E5%9D%87%E7%B2%BE%E5%BA%A6-toc" style="margin-left:40px;"><a href="#1.6%20AP%20%EF%BC%88Average%20Precision%EF%BC%89%EF%BC%9A%20%E5%B9%B3%E5%9D%87%E7%B2%BE%E5%BA%A6" rel="nofollow">1.6 AP （Average Precision）： 平均精度</a></p> 
+<p id="3%E3%80%81mAP%20%E2%80%94%E2%80%94%20%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E7%AE%97%E6%B3%95%E4%B8%AD%E6%9C%80%E9%87%8D%E8%A6%81%E7%9A%84%E4%B8%80%E4%B8%AA%E6%8C%87%E6%A0%87%E3%80%82-toc" style="margin-left:40px;"><a href="#3%E3%80%81mAP%20%E2%80%94%E2%80%94%20%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E7%AE%97%E6%B3%95%E4%B8%AD%E6%9C%80%E9%87%8D%E8%A6%81%E7%9A%84%E4%B8%80%E4%B8%AA%E6%8C%87%E6%A0%87%E3%80%82" rel="nofollow">1.7 mAP（mean Average Precision）：均值平均精度</a></p> 
+<p id="1.8%20F1-score%E4%B8%8E%20F%E5%80%BC(F-Measure)-toc" style="margin-left:40px;"><a href="#1.8%20F1-score%E4%B8%8E%20F%E5%80%BC%28F-Measure%29" rel="nofollow">1.8 F1-score与 F值(F-Measure)</a></p> 
+<p id="%F0%9F%8C%9F%E4%BA%8C%E3%80%81%E8%AE%AD%E7%BB%83%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90-toc" style="margin-left:0px;"><a href="#%F0%9F%8C%9F%E4%BA%8C%E3%80%81%E8%AE%AD%E7%BB%83%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90" rel="nofollow">🌟二、训练结果分析</a></p> 
+<p id="2.1%20weights%20%EF%BC%9A%E6%9D%83%E9%87%8D-toc" style="margin-left:40px;"><a href="#2.1%20weights%20%EF%BC%9A%E6%9D%83%E9%87%8D" rel="nofollow">2.1 weights ：权重</a></p> 
+<p id="2.2%C2%A0confusion_matrix.png%20%EF%BC%9A%20%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5-toc" style="margin-left:40px;"><a href="#2.2%C2%A0confusion_matrix.png%20%EF%BC%9A%20%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5" rel="nofollow">2.2&nbsp;confusion_matrix.png ： 混淆矩阵</a></p> 
+<p id="2.3%C2%A0F1_curve.png%20%EF%BC%9AF1%E6%9B%B2%E7%BA%BF-toc" style="margin-left:40px;"><a href="#2.3%C2%A0F1_curve.png%20%EF%BC%9AF1%E6%9B%B2%E7%BA%BF" rel="nofollow">2.3&nbsp;F1_curve.png ：F1曲线</a></p> 
+<p id="articleContentId-toc" style="margin-left:40px;"><a href="#articleContentId" rel="nofollow">2.4 events.out.tfevents：可视化文件</a></p> 
+<p id="2.5%20hyp.yaml%E5%92%8Copt.yaml%EF%BC%9A%E8%B6%85%E5%8F%82%E6%95%B0-toc" style="margin-left:40px;"><a href="#2.5%20hyp.yaml%E5%92%8Copt.yaml%EF%BC%9A%E8%B6%85%E5%8F%82%E6%95%B0" rel="nofollow">2.5 hyp.yaml和opt.yaml：超参数</a></p> 
+<p id="2.6%C2%A0%20P_curve.png%EF%BC%9A%E5%87%86%E7%A1%AE%E7%8E%87%E5%92%8C%E7%BD%AE%E4%BF%A1%E5%BA%A6%E7%9A%84%E5%85%B3%E7%B3%BB%E5%9B%BE-toc" style="margin-left:40px;"><a href="#2.6%C2%A0%20P_curve.png%EF%BC%9A%E5%87%86%E7%A1%AE%E7%8E%87%E5%92%8C%E7%BD%AE%E4%BF%A1%E5%BA%A6%E7%9A%84%E5%85%B3%E7%B3%BB%E5%9B%BE" rel="nofollow">2.6&nbsp; P_curve.png：准确率和置信度的关系图</a></p> 
+<p id="2.7%C2%A0%20R_curve.png%20%EF%BC%9A%E5%8F%AC%E5%9B%9E%E7%8E%87%E5%92%8C%E7%BD%AE%E4%BF%A1%E5%BA%A6%E7%9A%84%E5%85%B3%E7%B3%BB%E5%9B%BE%C2%A0-toc" style="margin-left:40px;"><a href="#2.7%C2%A0%20R_curve.png%20%EF%BC%9A%E5%8F%AC%E5%9B%9E%E7%8E%87%E5%92%8C%E7%BD%AE%E4%BF%A1%E5%BA%A6%E7%9A%84%E5%85%B3%E7%B3%BB%E5%9B%BE%C2%A0" rel="nofollow">2.7&nbsp; R_curve.png ：召回率和置信度的关系图&nbsp;</a></p> 
+<p id="2.8%20PR_curve.png%20%EF%BC%9A%E7%B2%BE%E7%A1%AE%E7%8E%87%E5%92%8C%E5%8F%AC%E5%9B%9E%E7%8E%87%E7%9A%84%E5%85%B3%E7%B3%BB%E5%9B%BE%C2%A0-toc" style="margin-left:40px;"><a href="#2.8%20PR_curve.png%20%EF%BC%9A%E7%B2%BE%E7%A1%AE%E7%8E%87%E5%92%8C%E5%8F%AC%E5%9B%9E%E7%8E%87%E7%9A%84%E5%85%B3%E7%B3%BB%E5%9B%BE%C2%A0" rel="nofollow">2.8 PR_curve.png ：精确率和召回率的关系图&nbsp;</a></p> 
+<p id="2.9%C2%A0results.png%20%EF%BC%9A%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AE%AD%E7%BB%83%E7%BB%93%E6%9E%9C%E8%A7%A3%E6%9E%90-toc" style="margin-left:40px;"><a href="#2.9%C2%A0results.png%20%EF%BC%9A%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AE%AD%E7%BB%83%E7%BB%93%E6%9E%9C%E8%A7%A3%E6%9E%90" rel="nofollow">2.9&nbsp;results.png ：可视化训练结果解析</a></p> 
+<p id="2.10%20results.txt%EF%BC%9A%E6%A3%80%E6%B5%8B%E7%BB%93%E6%9E%9C%E6%96%87%E6%9C%AC-toc" style="margin-left:40px;"><a href="#2.10%20results.txt%EF%BC%9A%E6%A3%80%E6%B5%8B%E7%BB%93%E6%9E%9C%E6%96%87%E6%9C%AC" rel="nofollow">2.10 results.txt：检测结果文本</a></p> 
+<p id="2.11%C2%A0test_batchx%20%EF%BC%9A%E7%94%A8%E4%BA%8E%E6%B5%8B%E8%AF%95%E6%A8%A1%E5%9E%8B%E6%80%A7%E8%83%BD%E7%9A%84%E6%96%87%E4%BB%B6%E5%A4%B9-toc" style="margin-left:40px;"><a href="#2.11%C2%A0test_batchx%20%EF%BC%9A%E7%94%A8%E4%BA%8E%E6%B5%8B%E8%AF%95%E6%A8%A1%E5%9E%8B%E6%80%A7%E8%83%BD%E7%9A%84%E6%96%87%E4%BB%B6%E5%A4%B9" rel="nofollow">2.11&nbsp;test_batchx ：用于测试模型性能的文件夹</a></p> 
+<p id="2.12%C2%A0val_batchx_labels%EF%BC%9A%E9%AA%8C%E8%AF%81%E9%9B%86%E7%AC%ACx%E8%BD%AE%E7%9A%84%E5%AE%9E%E9%99%85%E6%A0%87%E7%AD%BE-toc" style="margin-left:40px;"><a href="#2.12%C2%A0val_batchx_labels%EF%BC%9A%E9%AA%8C%E8%AF%81%E9%9B%86%E7%AC%ACx%E8%BD%AE%E7%9A%84%E5%AE%9E%E9%99%85%E6%A0%87%E7%AD%BE" rel="nofollow">2.12&nbsp;val_batchx_labels：验证集第x轮的实际标签</a></p> 
+<p id="%F0%9F%8C%9F%E4%B8%89%E3%80%81%E5%BD%B1%E5%93%8DmAP%E6%8C%87%E6%A0%87%E7%9A%84%E5%9B%A0%E7%B4%A0-toc" style="margin-left:0px;"><a href="#%F0%9F%8C%9F%E4%B8%89%E3%80%81%E5%BD%B1%E5%93%8DmAP%E6%8C%87%E6%A0%87%E7%9A%84%E5%9B%A0%E7%B4%A0" rel="nofollow">🌟三、影响mAP指标的因素</a></p> 
+<p id="%F0%9F%8C%9F%E5%9B%9B%E3%80%81%E4%BC%98%E5%8C%96mAP%E7%9A%84%E6%96%B9%E6%B3%95-toc" style="margin-left:0px;"><a href="#%F0%9F%8C%9F%E5%9B%9B%E3%80%81%E4%BC%98%E5%8C%96mAP%E7%9A%84%E6%96%B9%E6%B3%95" rel="nofollow">🌟四、优化mAP的方法</a></p> 
+<p><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fe8c20818cd09c4153dfc1a21d87fee37.gif"></p> 
+<h2 id="%F0%9F%8C%9F%E4%B8%80%E3%80%81%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87">🌟一、性能指标</h2> 
+<h3 id="1.1%20%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5">1.1 混淆矩阵</h3> 
+<p>混淆矩阵（Confusion&nbsp;<a href="https://so.csdn.net/so/search?q=Matrix&amp;spm=1001.2101.3001.7020" title="Matrix">Matrix</a>），对分类问题预测结果的总结。使用计数值汇总正确和不正确预测的数量，并按每个类进行细分，显示了<a href="https://so.csdn.net/so/search?q=%E5%88%86%E7%B1%BB%E6%A8%A1%E5%9E%8B&amp;spm=1001.2101.3001.7020" title="分类模型">分类模型</a>进行预测时会对哪一部分产生混淆。顾名思义，真的很容易混淆╮（￣﹏￣）╭</p> 
+<div> 
+ <p class="img-center"><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F41a7f18d61efdeb53fb2d6b31e7c9f5d.png"></p> 
+</div> 
+<ul><li><strong><span style="background-color:#fef2f0;">T(True)：</span></strong>最终预测结果<span style="color:#fe2c24;">正确</span>。</li><li><strong><span style="background-color:#fef2f0;">F(False)：</span></strong>最后预测结果<span style="color:#fe2c24;">错误</span>。</li><li><strong><span style="background-color:#fef2f0;">P(Positive)：</span></strong>模型预测其是<span style="color:#fe2c24;">正样本</span>(目标本身是<strong><span style="color:#4da8ee;">狗</span></strong>，模型也预测它是<span style="color:#4da8ee;"><strong>狗</strong></span>)。</li><li><strong><span style="background-color:#fef2f0;">N(Negative)：</span></strong>模型预测其是<span style="color:#fe2c24;">负样本</span>(目标本身是<strong><span style="color:#4da8ee;">狗</span></strong>，但模型预测它是个<span style="color:#e6b223;"><strong>猫</strong></span>)。</li><li><strong><span style="background-color:#fef2f0;">TP：</span></strong>样本的真实类别是<span style="color:#fe2c24;">正样本（P）</span>，并且模型预测的结果也是<span style="color:#fe2c24;">正样本（P）</span>，预测<span style="color:#fe2c24;">正确（T）</span>(目标本身是<span style="color:#4da8ee;"><strong>狗</strong></span>，模型也预测它是<strong><span style="color:#4da8ee;">狗</span></strong>，预测正确)。</li><li><strong><span style="background-color:#fef2f0;">TN：</span></strong>样本的真实类别是<span style="color:#fe2c24;">负样本（N）</span>，并且模型将其预测成为<span style="color:#fe2c24;">负样本（N）</span>，预测<span style="color:#fe2c24;">正确（T）</span>(目标本身不是<strong><span style="color:#4da8ee;">狗</span></strong>，模型预测它不是<strong><span style="color:#4da8ee;">狗</span></strong>，是个其他的东西，预测正确)。</li><li><strong><span style="background-color:#fef2f0;">FP：</span></strong>样本的真实类别是<span style="color:#fe2c24;">负样本（N）</span>，但是模型将其预测成为<span style="color:#fe2c24;">正样本（P）</span>，预测<span style="color:#fe2c24;">错误（F）</span>(目标本身不是<strong><span style="color:#4da8ee;">狗</span></strong>，模型预测它是<strong><span style="color:#4da8ee;">狗</span></strong>，预测错误)。</li><li><span style="color:#0d0016;"><strong><span style="background-color:#fef2f0;">FN：</span></strong></span>样本的真实类别是<span style="color:#fe2c24;">正样本（P）</span>，但是模型将其预测成为<span style="color:#fe2c24;">负样本（N）</span>，预测<span style="color:#fe2c24;">错误（F）</span>(目标本身是<strong><span style="color:#4da8ee;">狗</span></strong>，模型预测它不是<strong><span style="color:#4da8ee;">狗</span></strong>，是个其他的东西，预测错误)。</li></ul> 
+<hr> 
+<h3 id="1.2%C2%A0%20Accuracy%20%EF%BC%9A%E5%87%86%E7%A1%AE%E7%8E%87%EF%BC%88%E6%AD%A3%E7%A1%AE%E7%8E%87%EF%BC%89">1.2&nbsp; Accuracy ：准确率（正确率）</h3> 
+<p><strong>含义：</strong>所有预测中正确的百分比</p> 
+<p><strong>公式：</strong><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Flatex.csdn.net%2Feq%3F%255Ctext%2520%257B%2520accuracy%2520%257D%253D%255Cfrac%257BT%2520P%2BT%2520N%257D%257BT%2520P%2BF%2520P%2BF%2520N%2BT%2520N%257D"></p> 
+<p><strong>举个栗子：</strong>现有<strong>100</strong>只动物，分别是<strong><span style="color:#ad720d;">30只猫</span></strong>、<strong><span style="color:#4da8ee;">50只狗</span></strong>和<span style="color:#ed7976;"><strong>20只猪</strong></span>。经过模型检测之后预测正确的是<span style="color:#ad720d;"><strong>20只猫</strong></span>、<strong><span style="color:#4da8ee;">30只狗</span></strong>和<strong><span style="color:#ed7976;">10只猪</span></strong>，那么<strong><span style="color:#fe2c24;">准确率（Accuracy）</span></strong>=（<span style="color:#ad720d;">20</span>+<span style="color:#4da8ee;">30</span>+<span style="color:#ed7976;">10</span>）/100 = 60%。</p> 
+<p><strong>注：</strong>通常来说正确率越高，模型越好。</p> 
+<hr> 
+<h3 id="1.3%C2%A0Precision%20%EF%BC%9A%E7%B2%BE%E7%A1%AE%E7%8E%87%EF%BC%88%E6%9F%A5%E5%87%86%E7%8E%87%EF%BC%89">1.3&nbsp;Precision ：精确率（查准率）</h3> 
+<p><strong>含义：</strong>指模型识别出的正确正样本数占所有被识别为正样本的样本数的比例</p> 
+<p><strong>公式：</strong><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Flatex.csdn.net%2Feq%3Fprecision%253D%255Cfrac%257BT%2520P%257D%257BT%2520P%2BF%2520P%257D"></p> 
+<p><strong>举个栗子：</strong>现有<strong>100</strong>只动物，分别是<strong><span style="color:#ad720d;">30只猫</span></strong>、<strong><span style="color:#4da8ee;">50只狗</span></strong>和<span style="color:#ed7976;"><strong>20只猪</strong></span>。经过模型检测之后结果表示有<strong><span style="color:#ad720d;">35只猫</span></strong>，但它认为的<span style="color:#ad720d;"><strong>35只猫</strong></span>里面有<strong><span style="color:#4da8ee;">2只狗</span></strong>和<strong><span style="color:#ed7976;">3只猪</span></strong>，所以猫预测对的只有<span style="color:#ad720d;"><strong>30只</strong></span>，那么<span style="color:#fe2c24;"><strong>精确率Precision（猫）</strong></span>= 30/35 = 85.7%</p> 
+<hr> 
+<h3 id="1.4%20Recall%20%EF%BC%9A%E5%8F%AC%E5%9B%9E%E7%8E%87%EF%BC%88%E6%9F%A5%E5%85%A8%E7%8E%87%EF%BC%89">1.4 Recall ：召回率（查全率）</h3> 
+<p><strong>含义：</strong>指模型识别出的正样本数占真实正样本数的比例</p> 
+<p><strong>公式：</strong><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Flatex.csdn.net%2Feq%3FRecall%253D%255Cfrac%257BT%2520P%257D%257BT%2520P%2BF%2520N%257D"></p> 
+<p><strong>举个栗子：</strong>现有<strong>100</strong>只动物，分别是<strong><span style="color:#ad720d;">30只猫</span></strong>、<strong><span style="color:#4da8ee;">50只狗</span></strong>和<span style="color:#ed7976;"><strong>20只猪</strong></span>。经过模型检测之后结果表示只有<strong><span style="color:#ad720d;">25只猫</span></strong>，或许它把<span style="color:#0d0016;">另外</span><strong><span style="color:#ad720d;">5只猫</span></strong><span style="color:#0d0016;">错认成狗和猪了吧</span>，，那么<span style="color:#fe2c24;"><strong>召回率Recall（猫）</strong></span>= 25/30 = 83%</p> 
+<p><strong>注：</strong>召回率越高，实际为正<span style="color:#0d0016;">样本</span>（P）被预测出来的概率越高，类似于“宁可错杀一千，绝不放过一个”。</p> 
+<blockquote> 
+ <p>在检测过程中，我们当然希望检索结果Precision越高越好，同时Recall也越高越好，但事实上这两者是矛盾的。</p> 
+ <p><strong>举个栗子：</strong>还是看上面的动物，比如极端情况下，模型只检测出一只猫，且是正确的，那么Precision就是100%，但是Recall就很低；但是如果我们为了找全猫猫把所有结果都返回，那么Recall是100%，但是Precision当然就会很低。因此在不同的场合中需要判断希望Precision比较高或是Recall比较高。如果是做实验研究，可以绘制<strong>Precision-Recall曲线</strong>来帮助分析。</p> 
+</blockquote> 
+<hr> 
+<h3 id="1.5%C2%A0PR%E6%9B%B2%E7%BA%BF">1.5&nbsp;PR曲线</h3> 
+<p><strong>含义：</strong>P代表的是precision（精准率），R代表的是recall（召回率），其代表的是精准率与召回率的关系，一般情况下，将recall设置为横坐标，precision设置为纵坐标。</p> 
+<p><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fe744a6986b4796112bd2100d9301e51d.png"></p> 
+<p>在众多模型对数据进行学习后，如果其中一个模型的PR曲线A完全包住另一个模型B的PR曲线，则可断言A的性能优于B。</p> 
+<p>但是A和B发生交叉，那性能该如何判断呢？</p> 
+<p>我们可以根据曲线下方的面积大小来进行比较，但更常用的是平衡点F1。平衡点（BEP）是P=R时的取值（斜率为1），F1值越大，我们可以认为该学习器的性能较好。F1的计算如下所示：<br> F1 = 2 * P * R ／( P + R )</p> 
+<hr> 
+<h3 id="1.6%20AP%20%EF%BC%88Average%20Precision%EF%BC%89%EF%BC%9A%20%E5%B9%B3%E5%9D%87%E7%B2%BE%E5%BA%A6">1.6 AP （Average Precision）<strong>： 平均精度</strong></h3> 
+<p><strong>含义：</strong>PR曲线下面的面积，通常来说一个越好的模型，AP值越高</p> 
+<hr> 
+<h3 id="3%E3%80%81mAP%20%E2%80%94%E2%80%94%20%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E7%AE%97%E6%B3%95%E4%B8%AD%E6%9C%80%E9%87%8D%E8%A6%81%E7%9A%84%E4%B8%80%E4%B8%AA%E6%8C%87%E6%A0%87%E3%80%82">1.7 mAP（mean Average Precision）：均值平均精度</h3> 
+<p><strong>含义：</strong>即各个类别AP的平均值</p> 
+<p>用于表达多类标签预测的性能，如AP一样，mAP越高，性能越好。</p> 
+<ul><li><strong>mAP@.5</strong> 
+  <ul><li>当IoU为0.5时的mAP。</li></ul></li><li><strong>mAP@.5 : .95</strong> 
+  <ul><li>当IoU为range(0.5 : 0.95 : 0.05)时的mAP的平均数。</li></ul></li></ul> 
+<hr> 
+<h3 id="1.8%20F1-score%E4%B8%8E%20F%E5%80%BC(F-Measure)">1.8 F1-score与 F值(F-Measure)</h3> 
+<p><strong>F1-score</strong><strong>含义：</strong>是分类问题的一个衡量指标。一些多分类问题的机器学习竞赛，常常将F1-score作为最终测评的方法。它是精确率和召回率的调和平均数，最大为1，最小为0。</p> 
+<p><strong>公式：</strong><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Flatex.csdn.net%2Feq%3FF%25201%253D%255Cfrac%257B1%257D%257B%255Cfrac%257B1%257D%257BPrecision%257D%2B%255Cfrac%257B1%257D%257BRecall%257D%257D%253D%255Cfrac%257B2%2520%255Ctimes%2520Precision%2520%255Ctimes%2520Recall%257D%257BPrecision%2BRecall%257D"></p> 
+<p><strong>F值(F-Measure)含义：</strong>有时候我们对精确率和召回率并不是一视同仁，比如在医疗领域，我们不希望遗漏掉任何一位患者，所以应该更加重视召回率。我们用一个参数β来度量两者之间的关系，得到以下式子，是对P和R加权调和均值（不一定是平均），即F值(F-Measure)或称Fβ值：</p> 
+<p><strong>公式：</strong>​​​​​​​<img alt="" height="76" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F4825f29fe1bc942b0f16edbc0c4d64a4.png" width="211"></p> 
+<hr> 
+<h2 id="%F0%9F%8C%9F%E4%BA%8C%E3%80%81%E8%AE%AD%E7%BB%83%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90">🌟二、训练结果分析</h2> 
+<p>我们每次训练后，在<strong>runs/train</strong>文件夹下出现的一系列文件，如下图所示：</p> 
+<p><img alt="" height="653" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F09da4cbee9a51e0638f8d2672d8ff5ff.png" width="1200"></p> 
+<p>下面我们就逐一分析一下它们到底是干什么用的吧~</p> 
+<p>（涉及到理论知识的，大家往上滑动鼠标既可~）</p> 
+<hr> 
+<h3 id="2.1%20weights%20%EF%BC%9A%E6%9D%83%E9%87%8D">2.1 weights ：权重</h3> 
+<p><img alt="" height="156" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F5d0be73a925827c39a3f2781c6fbaf9e.png" width="1074"></p> 
+<p>这里存放的就是我们训练好的权重：</p> 
+<ul><li><span style="color:#ff9900;"><strong>best.pt：</strong></span>保存的是训练过程中在验证集上<span style="color:#fe2c24;">表现最好</span>的模型权重。在训练过程中，每个epoch结束后都会对验证集进行一次评估，并记录下表现最好的模型的权重。这个文件通常用于推理和部署阶段。</li><li><strong><span style="color:#98c091;">last.pt：</span></strong>保存的是<span style="color:#fe2c24;">最后一次训练迭代结束后</span>的模型权重。这个文件通常用于继续训练模型，因为它包含了最后一次训练迭代结束时的模型权重，可以继续从上一次训练结束的地方继续训练模型。</li></ul> 
+<p><strong>使用上的区别是：</strong>当需要在之前的训练基础上继续训练时，应该使用last.pt作为起点进行训练；当需要使用训练后的模型进行推理和部署时，应该使用best.pt。</p> 
+<hr> 
+<h3 id="2.2%C2%A0confusion_matrix.png%20%EF%BC%9A%20%E6%B7%B7%E6%B7%86%E7%9F%A9%E9%98%B5">2.2&nbsp;confusion_matrix.png ： 混淆矩阵</h3> 
+<div> 
+ <p class="img-center"><img alt="" height="408" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fd316db604d4cf4be76fb909e87b0514f.png" width="543"></p> 
+</div> 
+<p>在YOLOv5的训练结果中，<strong>confusion_matrix.png</strong>文件是一个混淆矩阵的可视化图像，用于展示模型在不同类别上的分类效果（我这个就是一个fire的单类，所以看得不明显）。</p> 
+<p>混淆矩阵是一个n×n的矩阵，其中n为分类数目，<span style="color:#fe2c24;">矩阵的每一行代表一个真实类别，每一列代表一个预测类别</span>，<span style="color:#fe2c24;">矩阵中的每一个元素表示真实类别为行对应的类别，而预测类别为列对应的类别的样本数。</span></p> 
+<hr> 
+<h3 id="2.3%C2%A0F1_curve.png%20%EF%BC%9AF1%E6%9B%B2%E7%BA%BF">2.3&nbsp;F1_curve.png ：F1曲线</h3> 
+<p class="img-center"><img alt="" height="1200" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F0ca7670af9bfa35e5a5cba4986e84272.png" width="1200"></p> 
+<p><span style="color:#fe2c24;"><strong>F1_curve是F1-score与置信度之间的关系：</strong></span>F1-score是分类问题的一个衡量指标，可以用于评估模型在检测出所有目标的情况下的精确性和完整性，是精确率precision和召回率recall的调和平均数，介于0，1之间，<strong>1是最好，0是最差。</strong></p> 
+<p>在 YOLOv5 的训练过程中，每个训练轮次结束后，会计算出模型在验证集上的 F1-score 值，并将这些值记录下来。F1_curve.png 就是将这些 F1-score 值绘制成的折线图，横轴表示置信度，纵轴表示 F1-score 值。通过观察 F1_curve.png，可以了解模型在训练过程中 F1-score 值的变化情况，以及模型的训练效果。</p> 
+<hr> 
+<h3 id="articleContentId">2.4 events.out.tfevents：可视化文件</h3> 
+<p><strong><span style="color:#fe2c24;">events.out.tfevents：</span></strong>主要是保存训练阶段和评估阶段得loss值的，不需要这次训练信息的话可以删</p> 
+<p>（其实这个我也不太清楚，也没找到讲解，以上是<em>@<u>-FIONASENIOR！！PEI</u></em>这位大佬以及其评论区的解读，如有不对请指正！）</p> 
+<hr> 
+<h3 id="2.5%20hyp.yaml%E5%92%8Copt.yaml%EF%BC%9A%E8%B6%85%E5%8F%82%E6%95%B0">2.5 hyp.yaml和opt.yaml：超参数</h3> 
+<ul><li><strong><span style="background-color:#38d8f0;">hyp.yaml文件</span></strong></li></ul> 
+<div> 
+ <p class="img-center"><img alt="" height="351" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F9aa253225e8af9133e6da533d287b734.png" width="275"></p> 
+</div> 
+<p>包含了<span style="color:#fe2c24;">训练超参数</span>的设置，包括<strong>学习率</strong>、<strong>动量</strong>、<strong>权重衰减系数</strong>、<strong>数据增强</strong>等参数。这些超参数的设置直接影响着模型的训练效果，通过对hyp.yaml文件进行调整，可以优化模型的性能。</p> 
+<ul><li><strong><span style="background-color:#a2e043;">opt.yaml文件</span></strong></li></ul> 
+<div> 
+ <p class="img-center"><img alt="" height="273" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F87ddf32fb29b416d9a600939dd5b7942.png" width="331"></p> 
+</div> 
+<p>包含了<span style="color:#fe2c24;">train.py中间的参数</span>的设置，如<strong>权重选择</strong>、<strong>配置文件选择</strong>、<strong>模型保存路径</strong>、<strong>训练轮次</strong>、<strong>批次大小</strong>等。这些设置会影响训练的整个流程，通过对opt.yaml文件进行调整，可以更好地控制训练过程。</p> 
+<p>在训练过程中，YOLOv5会读取hyp.yaml和opt.yaml文件中的设置，并根据这些设置进行训练。在训练完成后，这些文件也可以被用于模型的测试和部署。</p> 
+<hr> 
+<h3 id="2.6%C2%A0%20P_curve.png%EF%BC%9A%E5%87%86%E7%A1%AE%E7%8E%87%E5%92%8C%E7%BD%AE%E4%BF%A1%E5%BA%A6%E7%9A%84%E5%85%B3%E7%B3%BB%E5%9B%BE">2.6&nbsp; P_curve.png：准确率和置信度的关系图</h3> 
+<div> 
+ <p class="img-center"><img alt="" height="317" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fd9c04e8c3830b36a298a680ff6b93cb1.png" width="476"></p> 
+</div> 
+<p><span style="color:#fe2c24;"><strong>P_curve.png</strong></span>描述随着置信度阈值的增加，P值的变化；置信度设为某一数值的时候，各个类别识别的准确率。<br> 在目标检测中，置信度是指检测器对于每个检测框预测目标存在的概率。在YOLOv5的训练过程中，每个检测框的置信度都会被计算出来。P_curve.png将检测框的置信度从小到大排序，然后计算出不同置信度下的精度（Precision）值，最后将这些值绘制成一条曲线。</p> 
+<hr> 
+<h3 id="2.7%C2%A0%20R_curve.png%20%EF%BC%9A%E5%8F%AC%E5%9B%9E%E7%8E%87%E5%92%8C%E7%BD%AE%E4%BF%A1%E5%BA%A6%E7%9A%84%E5%85%B3%E7%B3%BB%E5%9B%BE%C2%A0">2.7&nbsp; R_curve.png ：召回率和置信度的关系图&nbsp;</h3> 
+<div> 
+ <p class="img-center"><img alt="" height="319" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fdbc46858d622471db5cb87e1c19e8534.png" width="479"></p> 
+</div> 
+<p><span style="color:#fe2c24;"><strong>R_curve.png</strong></span>是用于衡量模型在不同召回率下的精确度表现。在该图表中，X轴表示召回率，范围从0到1，Y轴表示精确度，范围也是从0到1。</p> 
+<p>在目标检测中，召回率指的是模型正确检测出目标的检测框数与所有目标的数量的比值。在YOLOv7的训练过程中，每个检测框的置信度都会被计算出来。R_curve.png将检测框的置信度从小到大排序，然后计算出不同置信度下的召回率值，最后将这些值绘制成一条曲线。</p> 
+<hr> 
+<h3 id="2.8%20PR_curve.png%20%EF%BC%9A%E7%B2%BE%E7%A1%AE%E7%8E%87%E5%92%8C%E5%8F%AC%E5%9B%9E%E7%8E%87%E7%9A%84%E5%85%B3%E7%B3%BB%E5%9B%BE%C2%A0">2.8 PR_curve.png ：精确率和召回率的关系图&nbsp;</h3> 
+<p style="text-align:center;"><img alt="" height="340" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F5f876c840bb2a166db1f73c0ac87a2ab.png" width="510">​</p> 
+<p><span style="color:#fe2c24;"><strong>PR_curve.png</strong></span><span style="color:#0d0016;">是描述</span>精度和召回率的关系图。精度越高，召回率越低，理想情况是(1,1)点，即在准确度很高的情况下，尽可能检测到全部的类别。二者围成的面积就是mAP值，mAP面积越接近于1，效果越好。&nbsp;</p> 
+<p>在目标检测中，精确率指的是模型正确检测出目标的检测框数与所有检测框数的比值，而召回率指的是模型正确检测出目标的检测框数与所有目标的数量的比值。在YOLOv5的训练过程中，每个检测框的置信度都会被计算出来。PR_curve.png将检测框的置信度从小到大排序，然后计算出不同置信度下的精确率和召回率值，最后将这些值绘制成一条曲线。</p> 
+<hr> 
+<h3 id="2.9%C2%A0results.png%20%EF%BC%9A%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AE%AD%E7%BB%83%E7%BB%93%E6%9E%9C%E8%A7%A3%E6%9E%90">2.9&nbsp;results.png ：可视化训练结果解析</h3> 
+<p>&nbsp;<img alt="" height="1200" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F223f5a10f5f4f553739b35636003ad17.png" width="1200">​</p> 
+<ul><li><strong><span style="background-color:#fef2f0;">定位损失box_loss：</span></strong>YOLO V5使用 GIOU Loss作为bounding box的损失，Box推测为GIoU损失函数均值，越小方框越准</li><li><strong><span style="background-color:#fef2f0;">置信度损失obj_loss：</span></strong>推测为目标检测loss均值，越小目标检测越准</li><li><strong><span style="background-color:#fef2f0;">分类损失cls_loss：</span></strong>推测为分类loss均值，越小分类越准</li><li><strong><span style="background-color:#fef2f0;">val/box_loss: &nbsp;</span></strong>验证集bounding box损失</li><li><strong><span style="background-color:#fef2f0;">val/obj_loss：</span></strong>验证集目标检测loss均值</li><li><strong><span style="background-color:#fef2f0;">val/cls_loss：</span></strong>验证集分类loss均值，我这个项目只有fire这一类，所以为0</li><li><strong><span style="background-color:#fef2f0;">mAP@0.5:0.95：</span></strong>表示在不同的IOU阈值（从0.5到0.95，步长为0.05）(0.5、0.55、0.6、0.65、0.7、0.75、0.8、0.85、0.9、0.95）上的平均mAP</li><li><strong><span style="background-color:#fef2f0;">mAP@0.5：</span></strong>表示阈值大于0.5的平均mAP</li></ul> 
+<p>一般训练结果主要观察<span style="color:#fe2c24;">精度和召回率波动情况</span>（波动不是很大则训练效果较好)，然后观察<span style="color:#fe2c24;">mAP@0.5 &amp; mAP@0.5:0.95 </span>评价训练结果。</p> 
+<hr> 
+<h3 id="2.10%20results.txt%EF%BC%9A%E6%A3%80%E6%B5%8B%E7%BB%93%E6%9E%9C%E6%96%87%E6%9C%AC">2.10 results.txt：检测结果文本</h3> 
+<p><img alt="" height="702" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Ffa8342d6ed3a3d5825001d0b2c650c97.png" width="1200">​</p> 
+<p><strong><span style="color:#fe2c24;">results.txt</span></strong>是YOLOv5模型在测试集上的检测结果文本文件。<br> 在目标检测任务中，我们需要对测试集中的图像进行目标检测，并将检测结果输出。results.txt就是将模型在测试集上的检测结果保存在文本文件中得到的文件。对于每张测试图像，results.txt会记录检测出的目标框的位置坐标、目标类别、以及置信度分数等信息。</p> 
+<p><strong>每行含义分别是：</strong>训练次数、GPU消耗、训练集边界框损失、训练集目标检测损失、训练集分类损失、训练集总损失、targets目标、输入图片大小、Precision、Recall、mAP@.5、mAP@.5:.95、验证集边界框损失、验证集目标检测损失、验证机分类损失</p> 
+<hr> 
+<h3 id="2.11%C2%A0test_batchx%20%EF%BC%9A%E7%94%A8%E4%BA%8E%E6%B5%8B%E8%AF%95%E6%A8%A1%E5%9E%8B%E6%80%A7%E8%83%BD%E7%9A%84%E6%96%87%E4%BB%B6%E5%A4%B9">2.11&nbsp;test_batchx ：用于测试模型性能的文件夹</h3> 
+<div> 
+ <p class="img-center"><img alt="" height="376" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fc585d357f0a4f22c05ef14d95725ca94.jpeg" width="376"></p> 
+</div> 
+<p><span style="color:#fe2c24;"><strong>test_batchx</strong></span>是YOLOv5模型用于保存测试集中的图像和标签信息的文件夹，其中x表示测试集的批次编号。<br> 在test_batchx文件夹中，每个图像都有一个对应的标签文件，用于描述图像中目标的位置和类别信息。测试时，将test_batchx文件夹中的图像输入到模型中进行目标检测，然后将检测结果与标签进行比较，计算模型的性能。</p> 
+<hr> 
+<h3 id="2.12%C2%A0val_batchx_labels%EF%BC%9A%E9%AA%8C%E8%AF%81%E9%9B%86%E7%AC%ACx%E8%BD%AE%E7%9A%84%E5%AE%9E%E9%99%85%E6%A0%87%E7%AD%BE">2.12&nbsp;val_batchx_labels：验证集第x轮的<strong>实际标签</strong></h3> 
+<p><img alt="" height="915" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2Fb62d2b94214ab9eef09ea9884b2fce5b.jpeg" width="1200">​<br><span style="color:#fe2c24;"><strong>val_batchx_labels </strong></span>是指测试集中一个 batch 的真实标签和框的信息，其中 x 为 batch 的编号。这些信息通常包括每个样本的分类标签和相应的边界框坐标（bounding box coordinates）。<br> 具体来说，val_batchx_labels 是一个列表（list）对象，其元素个数等于 batch size。每个元素是一个元组（tuple），长度为 2。第 1 个元素是大小为 N 的 tensor，表示该 batch 中 N 个目标的分类标签；第 2 个元素也是大小为 N 的 tensor，表示该 batch 中 N 个目标的 bounding box 坐标。</p> 
+<hr> 
+<h2 id="%F0%9F%8C%9F%E4%B8%89%E3%80%81%E5%BD%B1%E5%93%8DmAP%E6%8C%87%E6%A0%87%E7%9A%84%E5%9B%A0%E7%B4%A0">🌟三、影响mAP指标的因素</h2> 
+<p><span style="color:#fe2c24;"><strong>mAP</strong></span>是深度学习模型性能评估中非常重要的一种指标。比如在图像分类任务中，mAP指标可以帮助评估模型在真实图像数据上的性能，并且可以帮助选择适合任务的模型。</p> 
+<p><strong>影响mAP指标的因素：</strong></p> 
+<p><strong><span style="color:#4da8ee;">（1）模型的复杂度</span></strong></p> 
+<p><strong>模型的复杂度</strong>是影响mAP指标的一个重要因素。<span style="color:#fe2c24;">模型的复杂度越高，模型对数据集的拟合能力越强，模型在测试数据集上的性能也会越好。</span>然而，<span style="color:#1a439c;">模型的复杂度过高会导致模型训练时间过长，从而降低模型的性能。</span></p> 
+<p><span style="color:#a2e043;"><strong>（2）数据集的大小</strong></span></p> 
+<p><strong>数据集的大小</strong>也是影响mAP指标的一个重要因素。<span style="color:#fe2c24;">数据集越大，模型的性能也会越好。</span>然而，<span style="color:#1a439c;">如果数据集过大，模型的训练时间会增加，从而降低模型的性能。</span></p> 
+<p><span style="color:#e6b223;"><strong>（3）超参数的选择</strong></span><br><strong>超参数</strong>是影响模型性能的另一个重要因素。<span style="color:#fe2c24;">超参数的选择会影响模型的拟合能力，从而影响模型在测试数据集上的性能。</span><span style="color:#1a439c;">超参数的选择不当会导致模型的性能下降</span>。</p> 
+<hr> 
+<h2 id="%F0%9F%8C%9F%E5%9B%9B%E3%80%81%E4%BC%98%E5%8C%96mAP%E7%9A%84%E6%96%B9%E6%B3%95">🌟四、优化mAP的方法</h2> 
+<p><strong>优化mAP指标的方法：</strong></p> 
+<p><span style="color:#ff9900;"><strong>（1）数据增强</strong></span></p> 
+<p>通过对训练数据进行<span style="color:#fe2c24;">旋转、平移、缩放</span>等变换，增加样本量，提高模型的鲁棒性和泛化能力。</p> 
+<p><span style="color:#98c091;"><strong>（2）模型优化</strong></span></p> 
+<p>使用更加先进的模型结构，如<span style="color:#fe2c24;">ResNet、Inception、EfficientNet</span>等，或者对现有模型进行微调，如<span style="color:#fe2c24;">增加层数、减小学习率</span>等。</p> 
+<p><span style="color:#6eaad7;"><strong>（3）损失函数优化</strong></span></p> 
+<p>选择合适的损失函数，如<span style="color:#fe2c24;">Focal Loss、loU Loss</span>等，可以让模型更加关注难以识别的样本，提高模型的精度。</p> 
+<p><span style="color:#9c8ec1;"><strong>（4）多尺度训练</strong></span></p> 
+<p>在训练过程中，<span style="color:#fe2c24;">使用不同的输入尺寸</span>，可以让模型更好地适应不同大小的目标，从而提高模型的检测能力。</p> 
+<p><span style="color:#ad720d;"><strong>（5）网络融合</strong></span>&nbsp;</p> 
+<p>通过<span style="color:#fe2c24;">将不同的检测网络进行融合</span>，可以提高模型的表现，如Faster R-CNN和SSD的融合。</p> 
+<hr> 
+<p>完结~撒花✿✿ヽ(°▽°)ノ✿</p> 
+<blockquote> 
+ <p>本文参考（感谢大佬！）：</p> 
+ <p><a href="https://blog.csdn.net/weixin_55073640/article/details/128801151#comments_26335432" title="YOLOv5训练结果性能分析__tt丫的博客-CSDN博客">YOLOv5训练结果性能分析__tt丫的博客-CSDN博客</a></p> 
+ <p><a href="https://blog.csdn.net/weixin_43397302/article/details/127073824?ops_request_misc=&amp;request_id=&amp;biz_id=&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~koosearch~default-14-127073824-null-null.142%5Ev86%5Ekoosearch_v1,239%5Ev2%5Einsert_chatgpt&amp;utm_term=YOLOv5%E8%AE%AD%E7%BB%83%E7%BB%93%E6%9E%9C%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90&amp;spm=1018.2226.3001.4187" title="yolov7模型训练结果分析以及如何评估yolov7模型训练的效果_把爱留给SCI的博客-CSDN博客">yolov7模型训练结果分析以及如何评估yolov7模型训练的效果_把爱留给SCI的博客-CSDN博客</a></p> 
+</blockquote> 
+<p style="text-align:center;"><img alt="" src="http://apic.todo6.com/app/operate/csdn/proxy?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_migrate%2F5e129b610bf422c1d357aa7b63491d96.gif">​&nbsp;</p>
+                </div>
+        </div>
+        <div id="treeSkill"></div>
+    </article>
+  <script>
+    $(function() {
+      setTimeout(function () {
+        var mathcodeList = document.querySelectorAll('.htmledit_views img.mathcode');
+        if (mathcodeList.length > 0) {
+          for (let i = 0; i < mathcodeList.length; i++) {
+            if (mathcodeList[i].complete) {
+              if (mathcodeList[i].naturalWidth === 0 || mathcodeList[i].naturalHeight === 0) {
+                var alt = mathcodeList[i].alt;
+                alt = '\\(' + alt + '\\)';
+                var curSpan = $('<span class="img-codecogs"></span>');
+                curSpan.text(alt);
+                $(mathcodeList[i]).before(curSpan);
+                $(mathcodeList[i]).remove();
+              }
+            } else {
+              mathcodeList[i].onerror = function() {
+                var alt = mathcodeList[i].alt;
+                alt = '\\(' + alt + '\\)';
+                var curSpan = $('<span class="img-codecogs"></span>');
+                curSpan.text(alt);
+                $(mathcodeList[i]).before(curSpan);
+                $(mathcodeList[i]).remove();
+              };
+            }
+          }
+          MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+        }
+      }, 500)
+    });
+  </script>
+
+              </div>
+              </div>
+          </div>
+      </body>
+      </html>
